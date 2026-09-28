@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>STAGE 6: AI VISION VERIFICATION</title>
+  <style>
+    body { background: #0b0e14; color: #58a6ff; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+    .card { background: #161b22; border: 1px solid #30363d; padding: 30px; border-radius: 8px; width: 380px; text-align: center; }
+    input[type="file"] { margin: 20px 0; color: #8b949e; }
+    button { padding: 12px 24px; background: #238636; color: white; border: none; font-weight: bold; cursor: pointer; border-radius: 6px; font-family: monospace; }
+    button:disabled { background: #1f4e28; cursor: not-allowed; }
+    #status { margin-top: 15px; color: #e3b341; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h3>[ FINAL GATE: AI VERIFICATION ]</h3>
+    <p>Upload a clear photo of your hand-drawn solution from Stage 5 for Gemini AI inspection.</p>
+    <input type="file" id="imageInput" accept="image/*">
+    <br>
+    <button id="uploadBtn" onclick="submitDrawing()">VERIFY DRAWING</button>
+    <div id="status"></div>
+  </div>
+
+  <script>
+    async function submitDrawing() {
+      const fileInput = document.getElementById('imageInput');
+      const status = document.getElementById('status');
+      const btn = document.getElementById('uploadBtn');
+
+      if (!fileInput.files[0]) {
+        alert("Please select an image file first.");
+        return;
+      }
+
+      btn.disabled = true;
+      status.innerText = "Analyzing drawing with Gemini Vision AI...";
+
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64Image = reader.result;
+
+        try {
+          const res = await fetch('/api/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageBase64: base64Image })
+          });
+
+          const data = await res.json();
+
+          if (data.correct) {
+            window.location.href = "victory.html";
+          } else {
+            status.innerText = "REJECTED BY AI: Drawing does not match prompt. Try again.";
+            btn.disabled = false;
+          }
+        } catch (e) {
+          status.innerText = "Verification error. Try uploading a smaller image.";
+          btn.disabled = false;
+        }
+      };
+
+      reader.readAsDataURL(fileInput.files[0]);
+    }
+  </script>
+</body>
+</html>
