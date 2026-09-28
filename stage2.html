@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>STAGE 2: GEOGRAPHIC LOCK</title>
+  <style>
+    body { background: #0b0e14; color: #58a6ff; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+    .card { background: #161b22; border: 1px solid #30363d; padding: 30px; border-radius: 8px; width: 380px; text-align: center; }
+    input { width: 90%; padding: 10px; margin: 15px 0; background: #0d1117; border: 1px solid #30363d; color: #fff; font-family: monospace; border-radius: 4px; text-align: center; }
+    button { padding: 10px 20px; background: #238636; color: white; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h3>[ GATEWAY RIDDLE #2 ]</h3>
+    <p>Carved into rose-red rock by ancient desert travelers, guarded by a narrow canyon. Find this Wonder of the World and enter its GPS coordinates (Format: 30.32, 35.44):</p>
+    <input type="text" id="coords" placeholder="e.g. 30.32, 35.44" autocomplete="off">
+    <br>
+    <button onclick="checkCoords()">VERIFY COORDINATES</button>
+  </div>
+
+  <script>
+    function checkCoords() {
+      const input = document.getElementById('coords').value.replace(/\s+/g, '');
+      if (input.includes("30.32") && input.includes("35.44")) {
+        alert("COORDINATES VERIFIED.");
+        window.location.href = "stage3.html";
+      } else {
+        alert("LOCATION MISMATCH. Re-check the ancient city's location.");
+      }
+    }
+  </script>
+</body>
+</html>
