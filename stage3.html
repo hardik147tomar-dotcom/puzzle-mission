@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>STAGE 3: CIPHER GATE</title>
+  <style>
+    body { background: #0b0e14; color: #58a6ff; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+    .card { background: #161b22; border: 1px solid #30363d; padding: 30px; border-radius: 8px; width: 400px; text-align: center; }
+    .cipher-box { background: #0d1117; border: 1px dashed #58a6ff; padding: 15px; margin: 15px 0; letter-spacing: 3px; font-weight: bold; color: #e3b341; }
+    input { width: 90%; padding: 10px; margin: 10px 0; background: #0d1117; border: 1px solid #30363d; color: #fff; font-family: monospace; border-radius: 4px; text-align: center; }
+    button { padding: 10px 20px; background: #238636; color: white; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h3>[ GATEWAY RIDDLE #3 ]</h3>
+    <p>Shift the encrypted message below backward by 3 letters (Caesar Shift -3) to uncover the clearance pass:</p>
+    <div class="cipher-box">E L R P H W U L F</div>
+    <input type="text" id="pass" placeholder="Enter decrypted word..." autocomplete="off">
+    <br>
+    <button onclick="checkPass()">PROCEED TO CHECKPOINT</button>
+  </div>
+
+  <script>
+    function checkPass() {
+      const val = document.getElementById('pass').value.trim().toLowerCase();
+      if (val === 'biometric') {
+        window.location.href = "scan.html";
+      } else {
+        alert("INVALID PASSPHRASE. Shift each letter 3 places back in the alphabet.");
+      }
+    }
+  </script>
+</body>
+</html>
