@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STAGE 6: GANG EMBLEM VERIFICATION</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: #f5f2eb;
+      color: #2d3748;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .stage-badge {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #718096;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 520px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+    }
+
+    h2 {
+      color: #1a202c;
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+
+    p.subtext {
+      font-size: 14px;
+      color: #718096;
+      margin-bottom: 20px;
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      margin: 0 auto 20px auto;
+      border: 2px dashed #cbd5e0;
+      border-radius: 16px;
+      background: #ffffff;
+      touch-action: none; /* Prevents mobile page scrolling while drawing */
+    }
+
+    canvas#drawCanvas {
+      width: 100%;
+      height: 100%;
+      border-radius: 14px;
+      cursor: crosshair;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .btn {
+      padding: 14px 20px;
+      background: #2b6cb0;
+      color: white;
+      border: none;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 10px;
+      flex: 1;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      background: #2c5282;
+    }
+
+    .btn-secondary {
+      background: #edf2f7;
+      color: #4a5568;
+      border: 1px solid #cbd5e0;
+    }
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    .btn:disabled {
+      background: #a0aec0;
+      cursor: not-allowed;
+    }
+
+    #status {
+      font-size: 14px;
+      font-weight: 600;
+      min-height: 20px;
+      color: #718096;
+    }
+
+    /* Hidden canvases for algorithm calculation */
+    .hidden-canvas {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="stage-badge">STAGE 6 OF 6</div>
+
+<div class="container">
+  <h2>DRAW EMBLEM</h2>
+  <p class="subtext">Draw the official symbol below to confirm authentication.</p>
+
+  <div class="canvas-wrapper">
+    <canvas id="drawCanvas" width="300" height="300"></canvas>
+  </div>
+
+  <div class="btn-group">
+    <button class="btn btn-secondary" onclick="clearCanvas()">CLEAR</button>
+    <button id="verifyBtn" class="btn" onclick="verifyDrawing()">VERIFY EMBLEM</button>
+  </div>
+
+  <div id="status">Touch or click and drag to draw</div>
+</div>
+
+<!-- Offscreen canvases for normalization and image processing -->
+<canvas id="refCanvas" width="300" height="300" class="hidden-canvas"></canvas>
+<canvas id="userNormCanvas" width="64" height="64" class="hidden-canvas"></canvas>
+<canvas id="refNormCanvas" width="64" height="64" class="hidden-canvas"></canvas>
+
+<script>
+  const canvas = document.getElementById('drawCanvas');
+  const ctx = canvas.getContext('2d');
+  const statusEl = document.getElementById('status');
+  const verifyBtn = document.getElementById('verifyBtn');
+
+  let isDrawing = false;
+  let hasStrokes = false;
+
+  // Initialize Canvas
+  ctx.lineWidth = 12;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = '#1a202c';
+
+  // Setup Touch / Pointer Listeners
+  canvas.addEventListener('pointerdown', startDrawing);
+  canvas.addEventListener('pointermove', draw);
+  canvas.addEventListener('pointerup', stopDrawing);
+  canvas.addEventListener('pointercancel', stopDrawing);
+
+  function startDrawing(e) {
+    isDrawing = true;
+    hasStrokes = true;
+    ctx.beginPath();
+    const pos = getPos(e);
+    ctx.moveTo(pos.x, pos.y);
+  }
+
+  function draw(e) {
+    if (!isDrawing) return;
+    const pos = getPos(e);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+  }
+
+  function stopDrawing() {
+    isDrawing = false;
+  }
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: (e.clientX - rect.left) * (canvas.width / rect.width),
+      y: (e.clientY - rect.top) * (canvas.height / rect.height)
+    };
+  }
+
+  function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    hasStrokes = false;
+    statusEl.style.color = "#718096";
+    statusEl.innerText = "Canvas cleared. Touch or click and drag to draw";
+    verifyBtn.disabled = false;
+  }
+
+  // Draw reference template (matching uploaded image geometry)
+  function renderReferenceLogo() {
+    const refCanvas = document.getElementById('refCanvas');
+    const refCtx = refCanvas.getContext('2d');
+    refCtx.clearRect(0, 0, 300, 300);
+    refCtx.lineWidth = 12;
+    refCtx.lineCap = 'round';
+    refCtx.lineJoin = 'round';
+    refCtx.strokeStyle = '#1a202c';
+
+    // 1. Central Vertical Line
+    refCtx.beginPath();
+    refCtx.moveTo(150, 80);
+    refCtx.lineTo(150, 180);
+    refCtx.stroke();
+
+    // 2. Left Curved Arc
+    refCtx.beginPath();
+    refCtx.arc(110, 190, 45, Math.PI * 0.9, Math.PI * 1.95, false);
+    refCtx.stroke();
+
+    // 3. Right Curved Arc
+    refCtx.beginPath();
+    refCtx.arc(190, 190, 45, Math.PI * 1.05, Math.PI * 0.1, true);
+    refCtx.stroke();
+  }
+
+  renderReferenceLogo();
+
+  function verifyDrawing() {
+    if (!hasStrokes) {
+      statusEl.style.color = "#e53e3e";
+      statusEl.innerText = "Please draw the symbol before submitting.";
+      return;
+    }
+
+    verifyBtn.disabled = true;
+    statusEl.style.color = "#d69e2e";
+    statusEl.innerText = "Analyzing emblem structure...";
+
+    setTimeout(() => {
+      const matchScore = calculateMatchPercentage();
+      
+      // Target tolerance threshold: 60%
+      if (matchScore >= 60) {
+        statusEl.style.color = "#38a169";
+        statusEl.innerText = `EMBLEM VERIFIED (${matchScore.toFixed(0)}% Match)! Redirecting...`;
+        setTimeout(() => {
+          window.location.href = "victory.html";
+        }, 1200);
+      } else {
+        statusEl.style.color = "#e53e3e";
+        statusEl.innerText = `REJECTED (${matchScore.toFixed(0)}% Match). Clear and try again.`;
+        verifyBtn.disabled = false;
+      }
+    }, 300);
+  }
+
+  // Bounding Box Normalization & Fuzzy Line Comparison
+  function calculateMatchPercentage() {
+    const userBox = getBoundingBox(ctx, 300, 300);
+    const refCanvas = document.getElementById('refCanvas');
+    const refCtx = refCanvas.getContext('2d');
+    const refBox = getBoundingBox(refCtx, 300, 300);
+
+    if (!userBox || !refBox) return 0;
+
+    // Draw user box normalized to 64x64 grid
+    const uNorm = document.getElementById('userNormCanvas');
+    const uCtx = uNorm.getContext('2d');
+    uCtx.clearRect(0, 0, 64, 64);
+    uCtx.drawImage(canvas, userBox.x, userBox.y, userBox.w, userBox.h, 6, 6, 52, 52);
+
+    // Draw reference box normalized to 64x64 grid
+    const rNorm = document.getElementById('refNormCanvas');
+    const rCtx = rNorm.getContext('2d');
+    rCtx.clearRect(0, 0, 64, 64);
+    rCtx.drawImage(refCanvas, refBox.x, refBox.y, refBox.w, refBox.h, 6, 6, 52, 52);
+
+    const uData = uCtx.getImageData(0, 0, 64, 64).data;
+    const rData = rCtx.getImageData(0, 0, 64, 64).data;
+
+    let totalRefPixels = 0;
+    let matchedPixels = 0;
+
+    for (let y = 0; y < 64; y++) {
+      for (let x = 0; x < 64; x++) {
+        const rIndex = (y * 64 + x) * 4 + 3;
+        if (rData[rIndex] > 50) { // Reference stroke pixel
+          totalRefPixels++;
+          if (hasNearbyUserPixel(uData, x, y, 4)) { // 4px tolerance radius
+            matchedPixels++;
+          }
+        }
+      }
+    }
+
+    if (totalRefPixels === 0) return 0;
+    return Math.min(100, (matchedPixels / totalRefPixels) * 100);
+  }
+
+  function hasNearbyUserPixel(uData, cx, cy, radius) {
+    for (let dy = -radius; dy <= radius; dy++) {
+      for (let dx = -radius; dx <= radius; dx++) {
+        const nx = cx + dx;
+        const ny = cy + dy;
+        if (nx >= 0 && nx < 64 && ny >= 0 && ny < 64) {
+          const uIndex = (ny * 64 + nx) * 4 + 3;
+          if (uData[uIndex] > 50) return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  function getBoundingBox(context, w, h) {
+    const data = context.getImageData(0, 0, w, h).data;
+    let minX = w, minY = h, maxX = 0, maxY = 0;
+    let found = false;
+
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        if (data[(y * w + x) * 4 + 3] > 50) {
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+          found = true;
+        }
+      }
+    }
+    return found ? { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1 } : null;
+  }
+</script>
+</body>
+</html>
