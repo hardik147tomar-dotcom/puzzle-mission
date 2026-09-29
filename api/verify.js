@@ -1,5 +1,4 @@
 module.exports = async function handler(req, res) {
-  // Always set JSON header
   res.setHeader('Content-Type', 'application/json');
 
   if (req.method !== 'POST') {
@@ -7,7 +6,6 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    // 1. Safe Body Parsing (handles string or object)
     let body = req.body;
     if (typeof body === 'string') {
       try {
@@ -20,19 +18,16 @@ module.exports = async function handler(req, res) {
     const imageBase64 = body ? body.imageBase64 : null;
     const apiKey = process.env.GEMINI_API_KEY;
 
-    // 2. Check for API Key
     if (!apiKey) {
       return res.status(500).json({ 
         error: "GEMINI_API_KEY is missing in Vercel Environment Variables!" 
       });
     }
 
-    // 3. Check for Image Data
     if (!imageBase64 || typeof imageBase64 !== 'string') {
       return res.status(400).json({ error: "No valid image data payload received." });
     }
 
-    // Extract mime type and base64 string
     const parts = imageBase64.split(',');
     if (parts.length < 2) {
       return res.status(400).json({ error: "Malformed image base64 data." });
@@ -44,8 +39,8 @@ module.exports = async function handler(req, res) {
 
     const promptText = 'Analyze this image. Does this image contain a real or clearly visible flying bird? Respond strictly with a JSON object in this exact format: {"correct": true} or {"correct": false}.';
 
-    // 4. Call Gemini API
-    const apiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+    // Updated endpoint to gemini-3.8-flash
+    const apiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
