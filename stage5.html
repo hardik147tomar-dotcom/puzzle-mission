@@ -2,27 +2,50 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>STAGE 5: SYSTEM CHECK</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STAGE 5</title>
   <style>
-    body { background: #0b0e14; color: #0b0e14; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-    .hidden-text { font-size: 18px; text-align: center; max-width: 500px; line-height: 1.6; user-select: text; }
-    .btn-container { margin-top: 40px; }
-    button { padding: 12px 24px; background: #1f6beb; color: white; border: none; font-weight: bold; cursor: pointer; border-radius: 6px; font-family: monospace; }
+    * { box-sizing: border-box; }
+    body { background-color: #f5f2eb; color: #2d3748; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 24px; }
+    .stage-badge { font-size: 14px; font-weight: 700; letter-spacing: 2px; color: #718096; text-transform: uppercase; margin-bottom: 16px; }
+    .card { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); padding: 40px; border-radius: 16px; width: 100%; max-width: 560px; text-align: center; }
+    h2 { color: #1a202c; margin-top: 0; font-size: 26px; margin-bottom: 20px; }
+    .double-code-box { background: #edf2f7; border-radius: 12px; padding: 20px; font-family: monospace; font-size: 20px; font-weight: bold; color: #2b6cb0; letter-spacing: 4px; margin-bottom: 24px; word-break: break-all; border: 2px dashed #cbd5e0; }
+    p { color: #718096; font-size: 15px; margin-bottom: 24px; }
+    label { font-size: 16px; font-weight: 700; color: #2d3748; display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+    input[type="text"] { width: 100%; padding: 16px; margin-bottom: 20px; background: #ffffff; border: 2px solid #cbd5e0; color: #1a202c; font-size: 18px; border-radius: 10px; text-align: center; outline: none; }
+    input[type="text"]:focus { border-color: #3182ce; }
+    button { padding: 16px 28px; background: #2b6cb0; color: white; border: none; font-size: 18px; font-weight: 600; cursor: pointer; border-radius: 10px; width: 100%; transition: background 0.2s; }
+    button:hover { background: #2c5282; }
   </style>
 </head>
 <body>
 
-  <div class="hidden-text">
-    [ SYSTEM MEMORY OVERFLOW ]<br><br>
-    Highlight this text (Ctrl+A / drag cursor) to reveal instructions:<br><br>
-    Take a sheet of paper and HAND-DRAW the following picture:<br>
-    <b>"A cat wearing a wizard hat"</b><br><br>
-    Once drawn, click the button below to upload your proof to the AI Vision Gate.
+  <div class="stage-badge">STAGE 5 OF 5</div>
+
+  <div class="card">
+    <h2>[ STAGE 5: DOUBLE CIPHER ]</h2>
+
+    <div class="double-code-box">
+      ... &nbsp; -.- &nbsp; -.. &nbsp; --.- &nbsp; .-- &nbsp; .-. &nbsp; .--.
+    </div>
+
+    <p>( Hint: Convert Morse Code to letters, then shift each letter backward by 3 in the alphabet )</p>
+
+    <label for="password">FINAL PASSWORD</label>
+    <input type="text" id="password" placeholder="Enter final password..." autocomplete="off">
+    <button onclick="checkFinal()">SUBMIT PASSWORD</button>
   </div>
 
-  <div class="btn-container">
-    <button onclick="window.location.href='final.html'">PROCEED TO FINAL GATE</button>
-  </div>
-
+  <script>
+    function checkFinal() {
+      const val = document.getElementById('password').value.trim().toLowerCase();
+      if (val === 'phantom') {
+        window.location.href = "victory.html";
+      } else {
+        alert("ACCESS DENIED: Incorrect password.");
+      }
+    }
+  </script>
 </body>
 </html>
