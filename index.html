@@ -2,34 +2,56 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>STAGE 1: THE ENTRY CODE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STAGE 1</title>
   <style>
-    body { background: #0b0e14; color: #58a6ff; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-    .morse { color: #8b949e; font-size: 14px; letter-spacing: 2px; text-align: center; max-width: 80%; margin-bottom: 30px; }
-    .card { background: #161b22; border: 1px solid #30363d; padding: 30px; border-radius: 8px; width: 340px; text-align: center; }
-    input { width: 90%; padding: 10px; margin: 15px 0; background: #0d1117; border: 1px solid #30363d; color: #fff; font-family: monospace; border-radius: 4px; text-align: center; }
-    button { padding: 10px 20px; background: #238636; color: white; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; }
+    * { box-sizing: border-box; }
+    body { background-color: #f5f2eb; color: #2d3748; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 24px; }
+    .stage-badge { font-size: 14px; font-weight: 700; letter-spacing: 2px; color: #718096; text-transform: uppercase; margin-bottom: 16px; }
+    .card { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); padding: 40px; border-radius: 16px; width: 100%; max-width: 600px; text-align: left; }
+    .morse-banner { background: #edf2f7; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 16px; font-weight: bold; color: #2b6cb0; text-align: center; letter-spacing: 3px; margin-bottom: 24px; word-break: break-all; }
+    h2 { text-align: center; color: #1a202c; margin-top: 0; font-size: 26px; }
+    .riddle-list { margin-bottom: 28px; line-height: 1.6; }
+    .riddle-item { margin-bottom: 12px; padding: 10px 14px; background: #f8fafc; border-left: 4px solid #3182ce; border-radius: 4px; font-size: 16px; }
+    .input-group { margin-top: 24px; text-align: center; }
+    label { font-size: 16px; font-weight: 700; color: #2d3748; display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+    input[type="text"] { width: 100%; padding: 16px; margin-bottom: 20px; background: #ffffff; border: 2px solid #cbd5e0; color: #1a202c; font-size: 18px; border-radius: 10px; text-align: center; outline: none; }
+    input[type="text"]:focus { border-color: #3182ce; }
+    button { padding: 16px 28px; background: #2b6cb0; color: white; border: none; font-size: 18px; font-weight: 600; cursor: pointer; border-radius: 10px; width: 100%; transition: background 0.2s; }
+    button:hover { background: #2c5282; }
   </style>
 </head>
 <body>
 
-  <div class="morse">--. . - / - .... .-. --- ..- --. .... / - .... . / - .... .. .-. -.. / .-. .. -.. -.. .-.. .</div>
+  <div class="stage-badge">STAGE 1 OF 5</div>
 
   <div class="card">
-    <h3>[ GATEWAY RIDDLE #1 ]</h3>
-    <p>I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I?</p>
-    <input type="text" id="answer" placeholder="Enter answer..." autocomplete="off">
-    <br>
-    <button onclick="checkAnswer()">SUBMIT</button>
+    <div class="morse-banner">...-- / .-. .. -.. -.. .-.. . / .. ... / - .... . / -.- . -.--</div>
+    <h2>[ STAGE 1: RIDDLES ]</h2>
+    
+    <div class="riddle-list">
+      <div class="riddle-item"><b>Riddle 1:</b> I speak without a mouth and hear without ears. What am I?</div>
+      <div class="riddle-item"><b>Riddle 2:</b> What has roots as nobody sees, is taller than trees, and never grows?</div>
+      <div class="riddle-item"><b>Riddle 3:</b> I am always hungry, I must be fed. The finger I touch will soon turn red. What am I?</div>
+      <div class="riddle-item"><b>Riddle 4:</b> What can run but never walks, has a mouth but never talks?</div>
+      <div class="riddle-item"><b>Riddle 5:</b> The more of this there is, the less you see. What is it?</div>
+    </div>
+
+    <div class="input-group">
+      <label for="answer">ENTER KEY</label>
+      <input type="text" id="answer" placeholder="Enter answer..." autocomplete="off">
+      <button onclick="checkAnswer()">SUBMIT KEY</button>
+    </div>
   </div>
 
   <script>
     function checkAnswer() {
       const val = document.getElementById('answer').value.trim().toLowerCase();
-      if (val === 'echo') {
+      const validAnswers = ['fire', 'a fire', 'the fire'];
+      if (validAnswers.includes(val)) {
         window.location.href = "stage2.html";
       } else {
-        alert("ACCESS DENIED: Incorrect phrase.");
+        alert("INCORRECT KEY. Translate the Morse code banner on top for a hint.");
       }
     }
   </script>
