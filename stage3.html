@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>STAGE 3</title>
+
+  <!-- TensorFlow.js and COCO-SSD CDN Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+
   <style>
     * { box-sizing: border-box; }
     body { background-color: #f5f2eb; color: #2d3748; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 24px; }
@@ -25,7 +30,7 @@
   <div class="stage-badge">STAGE 3 OF 5</div>
 
   <div class="card">
-    <h2>UPLOAD A PICTURE OF A FLYING BIRD</h2>
+    <h2>UPLOAD A PICTURE OF A BIRD</h2>
 
     <div class="preview-box" onclick="document.getElementById('fileInput').click()">
       <span class="plus-icon" id="plusIcon">+</span>
@@ -39,6 +44,7 @@
 
   <script>
     let selectedFile = null;
+    let modelPromise = cocoSsd.load(); // Pre-load ML model in background
 
     function handleFileSelect(event) {
       const file = event.target.files[0];
@@ -98,73 +104,53 @@
       const btn = document.getElementById('verifyBtn');
 
       if (!selectedFile) {
-        alert("Please tap the preview box to upload a photo first.");
+        alert("Please select or capture a photo first.");
         return;
       }
 
       btn.disabled = true;
       status.style.color = "#d69e2e";
-      status.innerText = "Checking photo metadata...";
+      status.innerText = "Checking photo date...";
 
+      // EXIF Date verification
       const exifDate = await getExifDate(selectedFile);
       const today = new Date().toISOString().split('T')[0];
 
       if (exifDate && exifDate !== today) {
         status.style.color = "#e53e3e";
-        status.innerText = `REJECTED: Photo was taken on ${exifDate}. Must be clicked today (${today})!`;
+        status.innerText = `REJECTED: Photo taken on ${exifDate}. Must be taken today (${today})!`;
         btn.disabled = false;
         return;
       }
 
-      status.innerText = "Analyzing image with Gemini AI...";
+      status.innerText = "Scanning photo with local AI...";
 
-      const img = new Image();
-      img.src = URL.createObjectURL(selectedFile);
+      const imgElement = document.getElementById('imagePreview');
 
-      img.onload = async () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width, height = img.height, maxDim = 600;
-        if (width > height && width > maxDim) { height = Math.round((height * maxDim) / width); width = maxDim; }
-        else if (height > maxDim) { width = Math.round((width * maxDim) / height); height = maxDim; }
+      try {
+        const model = await modelPromise;
+        const predictions = await model.detect(imgElement);
 
-        canvas.width = width; canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
+        // Check if COCO-SSD detects a bird with > 30% confidence
+        const birdFound = predictions.some(p => p.class === 'bird' && p.score >= 0.30);
 
-        const base64Image = canvas.toDataURL('image/jpeg', 0.5);
-
-        try {
-          const res = await fetch('/api/verify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ imageBase64: base64Image })
-          });
-
-          const rawText = await res.text();
-          let data;
-          try {
-            data = JSON.parse(rawText);
-          } catch(e) {
-            throw new Error(`Server status ${res.status}: ${rawText.slice(0, 80)}`);
-          }
-
-          if (res.ok && data.correct) {
+        if (birdFound) {
+          status.style.color = "#38a169";
+          status.innerText = "VERIFIED! Bird detected.";
+          setTimeout(() => {
             window.location.href = "scan.html";
-          } else if (data.error) {
-            status.style.color = "#e53e3e";
-            status.innerText = "API Error: " + data.error;
-            btn.disabled = false;
-          } else {
-            status.style.color = "#e53e3e";
-            status.innerText = "REJECTED BY AI: Image does not contain a flying bird.";
-            btn.disabled = false;
-          }
-        } catch (e) {
+          }, 1000);
+        } else {
           status.style.color = "#e53e3e";
-          status.innerText = e.message;
+          status.innerText = "REJECTED: No bird detected in the image.";
           btn.disabled = false;
         }
-      };
+
+      } catch (err) {
+        status.style.color = "#e53e3e";
+        status.innerText = "Error analyzing image: " + err.message;
+        btn.disabled = false;
+      }
     }
   </script>
 </body>
