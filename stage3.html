@@ -17,7 +17,7 @@
     button { padding: 16px 28px; background: #2b6cb0; color: white; border: none; font-size: 18px; font-weight: 600; cursor: pointer; border-radius: 10px; width: 100%; transition: background 0.2s; }
     button:hover { background: #2c5282; }
     button:disabled { background: #a0aec0; cursor: not-allowed; }
-    #status { margin-top: 16px; font-size: 15px; font-weight: 600; color: #d69e2e; }
+    #status { margin-top: 16px; font-size: 15px; font-weight: 600; color: #d69e2e; word-break: break-word; }
   </style>
 </head>
 <body>
@@ -55,7 +55,6 @@
       reader.readAsDataURL(file);
     }
 
-    // Extract EXIF Date from JPEG
     function getExifDate(file) {
       return new Promise((resolve) => {
         const reader = new FileReader();
@@ -76,11 +75,11 @@
                 offset += 2;
                 for (let i = 0; i < tags; i++) {
                   let tag = view.getUint16(offset + (i * 12), little);
-                  if (tag == 0x9003 || tag == 0x0132) { // DateTimeOriginal or DateTime
+                  if (tag == 0x9003 || tag == 0x0132) {
                     let tOffset = view.getUint32(offset + (i * 12) + 8, little);
                     let str = "";
                     for (let j = 0; j < 10; j++) str += String.fromCharCode(view.getUint8(tOffset + j));
-                    return resolve(str.replace(/:/g, '-')); // Format: YYYY-MM-DD
+                    return resolve(str.replace(/:/g, '-'));
                   }
                 }
               } else {
@@ -107,7 +106,6 @@
       status.style.color = "#d69e2e";
       status.innerText = "Checking photo metadata...";
 
-      // 1. Metadata check: verify photo date matches today
       const exifDate = await getExifDate(selectedFile);
       const today = new Date().toISOString().split('T')[0];
 
@@ -120,13 +118,12 @@
 
       status.innerText = "Analyzing image with Gemini AI...";
 
-      // 2. Compress and prepare image
       const img = new Image();
       img.src = URL.createObjectURL(selectedFile);
 
       img.onload = async () => {
         const canvas = document.createElement('canvas');
-        let width = img.width, height = img.height, maxDim = 800;
+        let width = img.width, height = img.height, maxDim = 600;
         if (width > height && width > maxDim) { height = Math.round((height * maxDim) / width); width = maxDim; }
         else if (height > maxDim) { width = Math.round((width * maxDim) / height); height = maxDim; }
 
@@ -134,7 +131,7 @@
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
 
-        const base64Image = canvas.toDataURL('image/jpeg', 0.7);
+        const base64Image = canvas.toDataURL('image/jpeg', 0.5);
 
         try {
           const res = await fetch('/api/verify', {
@@ -143,7 +140,13 @@
             body: JSON.stringify({ imageBase64: base64Image })
           });
 
-          const data = await res.json();
+          const rawText = await res.text();
+          let data;
+          try {
+            data = JSON.parse(rawText);
+          } catch(e) {
+            throw new Error(`Server status ${res.status}: ${rawText.slice(0, 80)}`);
+          }
 
           if (res.ok && data.correct) {
             window.location.href = "scan.html";
@@ -158,7 +161,7 @@
           }
         } catch (e) {
           status.style.color = "#e53e3e";
-          status.innerText = "Network failure while reaching server.";
+          status.innerText = e.message;
           btn.disabled = false;
         }
       };
