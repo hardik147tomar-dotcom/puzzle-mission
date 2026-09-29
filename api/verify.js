@@ -37,13 +37,13 @@ module.exports = async function handler(req, res) {
     const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
     const base64Data = parts[1];
 
-    const promptText = 'Analyze this image. Does this image contain a real or clearly visible flying bird? Respond strictly with a JSON object in this exact format: {"correct": true} or {"correct": false}.';
+    const promptText = 'Analyze this image carefully. Does this image contain a real or clearly visible flying bird? Respond strictly with a JSON object in this exact format: {"correct": true} or {"correct": false}.';
 
-    // List of models to try in order of preference
+    // Active supported model list in order of preference
     const modelsToTry = [
-      'gemini-1.5-flash',
+      'gemini-3.8-flash',
       'gemini-2.5-flash',
-      'gemini-1.5-pro'
+      'gemini-2.5-pro'
     ];
 
     let lastError = null;
@@ -70,13 +70,20 @@ module.exports = async function handler(req, res) {
 
         const data = await apiResponse.json();
 
-        // If high demand or server busy, skip to next model in loop
         if (!apiResponse.ok) {
           lastError = data.error?.message || `Model ${model} returned error status ${apiResponse.status}`;
-          if (apiResponse.status === 503 || apiResponse.status === 429 || lastError.includes('high demand')) {
+          
+          // If model not found, overloaded, or high demand, move to next model
+          if (
+            apiResponse.status === 503 || 
+            apiResponse.status === 429 || 
+            apiResponse.status === 404 ||
+            lastError.includes('high demand') ||
+            lastError.includes('not found')
+          ) {
             continue;
           }
-          // If it's a critical auth/key issue, fail immediately
+          
           return res.status(apiResponse.status || 500).json({ error: lastError });
         }
 
@@ -86,7 +93,6 @@ module.exports = async function handler(req, res) {
         const cleanedText = textResult.replace(/```json|```/g, '').trim();
         const cleanJson = JSON.parse(cleanedText);
 
-        // Success! Return the response
         return res.status(200).json(cleanJson);
 
       } catch (err) {
@@ -94,9 +100,8 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    // If all models in the fallback array failed
     return res.status(503).json({ 
-      error: `All AI models are currently busy. Last error: ${lastError}` 
+      error: `All AI models are currently busy or unavailable. Last error: ${lastError}` 
     });
 
   } catch (error) {
