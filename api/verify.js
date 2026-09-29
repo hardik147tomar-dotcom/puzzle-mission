@@ -39,11 +39,12 @@ module.exports = async function handler(req, res) {
 
     const promptText = 'Analyze this image carefully. Does this image contain a real or clearly visible flying bird? Respond strictly with a JSON object in this exact format: {"correct": true} or {"correct": false}.';
 
-    // Active supported model list in order of preference
+    // Active model list in order of preference
     const modelsToTry = [
-      'gemini-3.8-flash',
       'gemini-2.5-flash',
-      'gemini-2.5-pro'
+      'gemini-3.1-pro-preview',
+      'gemini-3.8-flash',
+      'gemini-2.0-flash'
     ];
 
     let lastError = null;
@@ -72,19 +73,14 @@ module.exports = async function handler(req, res) {
 
         if (!apiResponse.ok) {
           lastError = data.error?.message || `Model ${model} returned error status ${apiResponse.status}`;
-          
-          // If model not found, overloaded, or high demand, move to next model
-          if (
-            apiResponse.status === 503 || 
-            apiResponse.status === 429 || 
-            apiResponse.status === 404 ||
-            lastError.includes('high demand') ||
-            lastError.includes('not found')
-          ) {
-            continue;
+
+          // If the API key itself is invalid/unauthorized, stop trying
+          if (apiResponse.status === 401 || (lastError && lastError.toLowerCase().includes('api key'))) {
+            return res.status(401).json({ error: lastError });
           }
-          
-          return res.status(apiResponse.status || 500).json({ error: lastError });
+
+          // For any model-specific issue (deprecated, busy, 404, etc.), skip to the next model
+          continue;
         }
 
         const textResult = data.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -101,7 +97,7 @@ module.exports = async function handler(req, res) {
     }
 
     return res.status(503).json({ 
-      error: `All AI models are currently busy or unavailable. Last error: ${lastError}` 
+      error: `All attempted AI models failed. Last error: ${lastError}` 
     });
 
   } catch (error) {
