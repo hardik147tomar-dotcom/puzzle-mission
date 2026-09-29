@@ -2,32 +2,64 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>STAGE 2: GEOGRAPHIC LOCK</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STAGE 2</title>
   <style>
-    body { background: #0b0e14; color: #58a6ff; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-    .card { background: #161b22; border: 1px solid #30363d; padding: 30px; border-radius: 8px; width: 380px; text-align: center; }
-    input { width: 90%; padding: 10px; margin: 15px 0; background: #0d1117; border: 1px solid #30363d; color: #fff; font-family: monospace; border-radius: 4px; text-align: center; }
-    button { padding: 10px 20px; background: #238636; color: white; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; }
+    * { box-sizing: border-box; }
+    body { background-color: #f5f2eb; color: #2d3748; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 24px; }
+    .stage-badge { font-size: 14px; font-weight: 700; letter-spacing: 2px; color: #718096; text-transform: uppercase; margin-bottom: 16px; }
+    .card { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); padding: 40px; border-radius: 16px; width: 100%; max-width: 560px; text-align: center; }
+    h2 { color: #1a202c; margin-top: 0; font-size: 26px; margin-bottom: 24px; }
+    .field-group { margin-bottom: 20px; text-align: left; }
+    label { font-size: 15px; font-weight: 700; color: #4a5568; display: block; margin-bottom: 6px; }
+    input[type="text"] { width: 100%; padding: 14px; background: #f8fafc; border: 2px solid #cbd5e0; color: #1a202c; font-size: 16px; border-radius: 8px; outline: none; }
+    input[type="text"]:focus { border-color: #3182ce; background: #ffffff; }
+    button { padding: 16px 28px; background: #2b6cb0; color: white; border: none; font-size: 18px; font-weight: 600; cursor: pointer; border-radius: 10px; width: 100%; margin-top: 10px; transition: background 0.2s; }
+    button:hover { background: #2c5282; }
   </style>
 </head>
 <body>
 
+  <div class="stage-badge">STAGE 2 OF 5</div>
+
   <div class="card">
-    <h3>[ GATEWAY RIDDLE #2 ]</h3>
-    <p>Carved into rose-red rock by ancient desert travelers, guarded by a narrow canyon. Find this Wonder of the World and enter its GPS coordinates (Format: 30.32, 35.44):</p>
-    <input type="text" id="coords" placeholder="e.g. 30.32, 35.44" autocomplete="off">
-    <br>
-    <button onclick="checkCoords()">VERIFY COORDINATES</button>
+    <h2>WHAT IS HARDIK'S...</h2>
+    
+    <div class="field-group">
+      <label for="email">E-Mail:</label>
+      <input type="text" id="email" placeholder="Enter email..." autocomplete="off">
+    </div>
+
+    <div class="field-group">
+      <label for="location">Location:</label>
+      <input type="text" id="location" placeholder="Enter location..." autocomplete="off">
+    </div>
+
+    <div class="field-group">
+      <label for="twitter">X (Twitter):</label>
+      <input type="text" id="twitter" placeholder="Enter handle / name..." autocomplete="off">
+    </div>
+
+    <button onclick="checkStage2()">VERIFY DETAILS</button>
   </div>
 
   <script>
-    function checkCoords() {
-      const input = document.getElementById('coords').value.replace(/\s+/g, '');
-      if (input.includes("30.32") && input.includes("35.44")) {
-        alert("COORDINATES VERIFIED.");
+    function checkStage2() {
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      const location = document.getElementById('location').value.trim().toLowerCase();
+      const twitter = document.getElementById('twitter').value.trim().toLowerCase();
+
+      const validEmail = "hardik147tomar@gmail.com";
+      const validLocation = "frankfurt";
+      const validTwitter = [
+        "i'm no brain guy", "im no brain guy", "imnobrainguy",
+        "@i'm no brain guy", "@im no brain guy", "@imnobrainguy"
+      ];
+
+      if (email === validEmail && location === validLocation && validTwitter.includes(twitter)) {
         window.location.href = "stage3.html";
       } else {
-        alert("LOCATION MISMATCH. Re-check the ancient city's location.");
+        alert("ONE OR MORE FIELDS ARE INCORRECT. Re-check all 3 entries.");
       }
     }
   </script>
