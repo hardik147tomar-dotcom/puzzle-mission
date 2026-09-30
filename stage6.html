@@ -87,7 +87,7 @@
           <div style="font-size:40px; margin-bottom:12px;">🛑</div>
           <h2 style="font-size:22px; color:#1a202c; margin-bottom:8px;">${title}</h2>
           <p style="font-size:14px; color:#718096; margin-bottom:24px;">${description}</p>
-          <a href="index.html" style="display:inline-block; padding:12px 24px; background:#2b6cb0; color:white; border-radius:8px; text-decoration:none; font-weight:600;">RETURN TO HUB</a>
+          <a href="index.html" style="display:inline-block; padding:12px 24px; background:#2b6cb0; color:white; border-radius:8px; text-weight:600;">RETURN TO HUB</a>
         </div>
       </div>
     `;
@@ -107,7 +107,7 @@
     
     .canvas-container { position: relative; width: 300px; height: 300px; margin: 0 auto 20px auto; border: 2px solid #cbd5e0; border-radius: 12px; background: #ffffff; overflow: hidden; }
     canvas { position: absolute; top: 0; left: 0; width: 300px; height: 300px; touch-action: none; }
-    #refCanvas { opacity: 1.0; pointer-events: none; }
+    #refCanvas { opacity: 0.25; pointer-events: none; }
     
     .btn-group { display: flex; gap: 10px; }
     button { flex: 1; padding: 12px 16px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; border-radius: 8px; transition: background 0.2s; }
@@ -148,24 +148,34 @@
 
     let isDrawing = false;
 
-    // Drawing settings
-    drawCtx.lineWidth = 10;
+    // Line styles matching stroke weight from your drawing
+    drawCtx.lineWidth = 12;
     drawCtx.lineCap = 'round';
     drawCtx.lineJoin = 'round';
     drawCtx.strokeStyle = '#1a202c';
 
-    refCtx.lineWidth = 10;
+    refCtx.lineWidth = 12;
     refCtx.lineCap = 'round';
     refCtx.lineJoin = 'round';
     refCtx.strokeStyle = '#2b6cb0';
 
-    // Target Emblem Blueprint (Circle + Cross)
+    // Target Emblem Blueprint (Custom Double-Arch with Center Stem)
     function drawTargetEmblem(ctx) {
       ctx.clearRect(0, 0, 300, 300);
       ctx.beginPath();
-      ctx.arc(150, 150, 80, 0, Math.PI * 2); // Circle
-      ctx.moveTo(150, 70); ctx.lineTo(150, 230); // Vertical Line
-      ctx.moveTo(70, 150); ctx.lineTo(230, 150); // Horizontal Line
+
+      // Central Vertical Stem
+      ctx.moveTo(150, 175);
+      ctx.lineTo(150, 115);
+
+      // Left Curved Arch
+      ctx.moveTo(98, 215);
+      ctx.bezierCurveTo(90, 138, 126, 128, 150, 175);
+
+      // Right Curved Arch
+      ctx.moveTo(150, 175);
+      ctx.bezierCurveTo(174, 128, 210, 138, 202, 215);
+
       ctx.stroke();
     }
 
@@ -230,18 +240,16 @@
         }
       }
 
-      if (totalPixels < 120) return null; // Dot / sparse drawing check
+      if (totalPixels < 100) return null; // Minimum stroke check
 
       const cropWidth = Math.max(maxX - minX + 1, 10);
       const cropHeight = Math.max(maxY - minY + 1, 10);
 
-      // Create an off-screen canvas to center and scale drawing
       const normCanvas = document.createElement('canvas');
       normCanvas.width = 300;
       normCanvas.height = 300;
       const normCtx = normCanvas.getContext('2d');
 
-      // Target bounding box size (200x200 centered at 150,150)
       const targetSize = 180;
       const scale = Math.min(targetSize / cropWidth, targetSize / cropHeight);
 
@@ -262,7 +270,6 @@
     function verifyDrawing() {
       const status = document.getElementById('status');
 
-      // Normalize user drawing to center
       const userNormCanvas = getNormalizedCanvas(drawCanvas);
 
       if (!userNormCanvas) {
@@ -271,7 +278,6 @@
         return;
       }
 
-      // Normalize reference shape to center for identical grid comparison
       const refNormCanvas = getNormalizedCanvas(refCanvas);
 
       const GRID_SIZE = 32;
@@ -302,7 +308,7 @@
       }
 
       const matchScore = Math.round((intersection / union) * 100);
-      const PASS_THRESHOLD = 45; // Flexible 45%+ overlap after normalization
+      const PASS_THRESHOLD = 40; // Flexible 40%+ threshold for freehand curves
 
       if (matchScore >= PASS_THRESHOLD) {
         status.style.color = "#38a169";
