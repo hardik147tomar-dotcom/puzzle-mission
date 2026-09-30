@@ -1,21 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <script>
-  // =========================================================
-  // CONFIGURATION FOR THIS FILE
-  // =========================================================
-  const CURRENT_STAGE = 6; // Change to 2, 3, 5, 6, etc. depending on the file
-  const MASTER_USERNAME = "PandaSmugs"; // Master bypass username
+  <script>
+  const CURRENT_STAGE = 6; 
+  const MASTER_USERNAME = "PandaSmugs";
 
   const UNLOCK_DATES = {
-    1: new Date(2026, 9, 1, 0, 0, 0),  // Oct 1, 12:00 AM
-    2: new Date(2026, 9, 2, 0, 0, 0),  // Oct 2, 12:00 AM
-    3: new Date(2026, 9, 3, 0, 0, 0),  // Oct 3, 12:00 AM
-    4: null,                            // Stage 4 (scan.html) - Immediate after Stage 3
-    5: new Date(2026, 9, 4, 0, 0, 0),  // Oct 4, 12:00 AM
-    6: new Date(2026, 9, 5, 0, 0, 0),  // Oct 5, 12:00 AM
-    7: null                             // Stage 7 & Victory - Immediate after Stage 6
+    1: new Date(2026, 9, 1, 0, 0, 0),
+    2: new Date(2026, 9, 2, 0, 0, 0),
+    3: new Date(2026, 9, 3, 0, 0, 0),
+    4: null,                            
+    5: new Date(2026, 9, 4, 0, 0, 0),
+    6: new Date(2026, 9, 5, 0, 0, 0),
+    7: null                             
   };
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -23,22 +20,18 @@
     const completedStage = parseInt(localStorage.getItem('completed_stage') || '0');
     const requiredPreviousStage = CURRENT_STAGE - 1;
 
-    // 1. Force Username Entry
     if (!username) {
       window.location.href = "index.html";
       return;
     }
 
-    // Check if current user is the master admin
     const isMasterUser = username.trim().toLowerCase() === MASTER_USERNAME.toLowerCase();
 
-    // 2. Check Prerequisite Progress
     if (!isMasterUser && completedStage < requiredPreviousStage) {
-      showLockOverlay(`Stage ${requiredPreviousStage} Required`, `Agent ${username}, you must complete Stage ${requiredPreviousStage} before accessing this stage.`);
+      showLockOverlay(`Stage ${requiredPreviousStage} Required`, `Agent ${username}, you must complete Stage ${requiredPreviousStage} before accessing Stage 6.`);
       return;
     }
 
-    // 3. Check Date Unlock Schedule (BYPASSED IF MASTER USER)
     const targetDate = UNLOCK_DATES[CURRENT_STAGE];
     const now = new Date();
 
@@ -54,7 +47,7 @@
       <div id="timeLockScreen" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#f5f2eb; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
         <div style="background:#ffffff; border:1px solid #e2e8f0; padding:40px; border-radius:16px; max-width:480px; width:100%; box-shadow:0 10px 25px -5px rgba(0,0,0,0.05);">
           <div style="font-size:40px; margin-bottom:12px;">🔒</div>
-          <h2 style="font-size:22px; color:#1a202c; margin-bottom:4px;">STAGE ${CURRENT_STAGE} LOCKED</h2>
+          <h2 style="font-size:22px; color:#1a202c; margin-bottom:4px;">STAGE 6 LOCKED</h2>
           <p style="font-size:13px; color:#2b6cb0; font-weight:700; margin-bottom:12px;">AGENT: ${username}</p>
           <p style="font-size:14px; color:#718096; margin-bottom:20px;">This stage will unlock on <strong>${formattedDate}</strong>.</p>
           
@@ -100,344 +93,231 @@
     `;
     document.body.insertAdjacentHTML('beforeend', lockHTML);
   }
-</script>
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>STAGE 6: GANG EMBLEM VERIFICATION</title>
+  <title>STAGE 6 - EMBLEM VERIFICATION</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-
-    body {
-      background-color: #f5f2eb;
-      color: #2d3748;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 24px;
-    }
-
-    .stage-badge {
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      color: #718096;
-      text-transform: uppercase;
-      margin-bottom: 16px;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 520px;
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-      border-radius: 16px;
-      padding: 32px;
-      text-align: center;
-    }
-
-    h2 {
-      color: #1a202c;
-      font-size: 22px;
-      margin-bottom: 8px;
-    }
-
-    p.subtext {
-      font-size: 14px;
-      color: #718096;
-      margin-bottom: 20px;
-    }
-
-    .canvas-wrapper {
-      position: relative;
-      width: 300px;
-      height: 300px;
-      margin: 0 auto 20px auto;
-      border: 2px dashed #cbd5e0;
-      border-radius: 16px;
-      background: #ffffff;
-      touch-action: none; /* Prevents mobile page scrolling while drawing */
-    }
-
-    canvas#drawCanvas {
-      width: 100%;
-      height: 100%;
-      border-radius: 14px;
-      cursor: crosshair;
-    }
-
-    .btn-group {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .btn {
-      padding: 14px 20px;
-      background: #2b6cb0;
-      color: white;
-      border: none;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      border-radius: 10px;
-      flex: 1;
-      transition: background 0.2s;
-    }
-
-    .btn:hover {
-      background: #2c5282;
-    }
-
-    .btn-secondary {
-      background: #edf2f7;
-      color: #4a5568;
-      border: 1px solid #cbd5e0;
-    }
-
-    .btn-secondary:hover {
-      background: #e2e8f0;
-    }
-
-    .btn:disabled {
-      background: #a0aec0;
-      cursor: not-allowed;
-    }
-
-    #status {
-      font-size: 14px;
-      font-weight: 600;
-      min-height: 20px;
-      color: #718096;
-    }
-
-    /* Hidden canvases for algorithm calculation */
-    .hidden-canvas {
-      display: none;
-    }
+    * { box-sizing: border-box; }
+    body { background-color: #f5f2eb; color: #2d3748; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 24px; }
+    .stage-badge { font-size: 14px; font-weight: 700; letter-spacing: 2px; color: #718096; text-transform: uppercase; margin-bottom: 16px; }
+    .card { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); padding: 32px; border-radius: 16px; width: 100%; max-width: 520px; text-align: center; }
+    h2 { color: #1a202c; margin-top: 0; font-size: 22px; margin-bottom: 8px; }
+    p.instructions { font-size: 14px; color: #718096; margin-bottom: 20px; }
+    
+    .canvas-container { position: relative; width: 300px; height: 300px; margin: 0 auto 20px auto; border: 2px solid #cbd5e0; border-radius: 12px; background: #ffffff; overflow: hidden; }
+    canvas { position: absolute; top: 0; left: 0; width: 300px; height: 300px; touch-action: none; }
+    #refCanvas { opacity: 0.25; pointer-events: none; }
+    
+    .btn-group { display: flex; gap: 10px; }
+    button { flex: 1; padding: 12px 16px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; border-radius: 8px; transition: background 0.2s; }
+    .btn-submit { background: #2b6cb0; color: white; }
+    .btn-submit:hover { background: #2c5282; }
+    .btn-clear { background: #edf2f7; color: #4a5568; }
+    .btn-clear:hover { background: #e2e8f0; }
+    
+    #status { margin-top: 16px; font-size: 15px; font-weight: 600; word-break: break-word; }
   </style>
 </head>
 <body>
 
-<div class="stage-badge">STAGE 6 OF 6</div>
+  <div class="stage-badge">STAGE 6</div>
 
-<div class="container">
-  <h2>DRAW EMBLEM</h2>
-  <p class="subtext">Draw the official symbol below to confirm authentication.</p>
+  <div class="card">
+    <h2>DRAW THE AGENCY EMBLEM</h2>
+    <p class="instructions">Draw the target symbol anywhere inside the box below.</p>
 
-  <div class="canvas-wrapper">
-    <canvas id="drawCanvas" width="300" height="300"></canvas>
+    <div class="canvas-container">
+      <canvas id="refCanvas" width="300" height="300"></canvas>
+      <canvas id="drawCanvas" width="300" height="300"></canvas>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn-clear" onclick="clearCanvas()">CLEAR</button>
+      <button class="btn-submit" onclick="verifyDrawing()">VERIFY EMBLEM</button>
+    </div>
+
+    <div id="status"></div>
   </div>
 
-  <div class="btn-group">
-    <button class="btn btn-secondary" onclick="clearCanvas()">CLEAR</button>
-    <button id="verifyBtn" class="btn" onclick="verifyDrawing()">VERIFY EMBLEM</button>
-  </div>
-
-  <div id="status">Touch or click and drag to draw</div>
-</div>
-
-<!-- Offscreen canvases for normalization and image processing -->
-<canvas id="refCanvas" width="300" height="300" class="hidden-canvas"></canvas>
-<canvas id="userNormCanvas" width="64" height="64" class="hidden-canvas"></canvas>
-<canvas id="refNormCanvas" width="64" height="64" class="hidden-canvas"></canvas>
-
-<script>
-  const canvas = document.getElementById('drawCanvas');
-  const ctx = canvas.getContext('2d');
-  const statusEl = document.getElementById('status');
-  const verifyBtn = document.getElementById('verifyBtn');
-
-  let isDrawing = false;
-  let hasStrokes = false;
-
-  // Initialize Canvas
-  ctx.lineWidth = 12;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-  ctx.strokeStyle = '#1a202c';
-
-  // Setup Touch / Pointer Listeners
-  canvas.addEventListener('pointerdown', startDrawing);
-  canvas.addEventListener('pointermove', draw);
-  canvas.addEventListener('pointerup', stopDrawing);
-  canvas.addEventListener('pointercancel', stopDrawing);
-
-  function startDrawing(e) {
-    isDrawing = true;
-    hasStrokes = true;
-    ctx.beginPath();
-    const pos = getPos(e);
-    ctx.moveTo(pos.x, pos.y);
-  }
-
-  function draw(e) {
-    if (!isDrawing) return;
-    const pos = getPos(e);
-    ctx.lineTo(pos.x, pos.y);
-    ctx.stroke();
-  }
-
-  function stopDrawing() {
-    isDrawing = false;
-  }
-
-  function getPos(e) {
-    const rect = canvas.getBoundingClientRect();
-    return {
-      x: (e.clientX - rect.left) * (canvas.width / rect.width),
-      y: (e.clientY - rect.top) * (canvas.height / rect.height)
-    };
-  }
-
-  function clearCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    hasStrokes = false;
-    statusEl.style.color = "#718096";
-    statusEl.innerText = "Canvas cleared. Touch or click and drag to draw";
-    verifyBtn.disabled = false;
-  }
-
-  // Draw reference template (matching uploaded image geometry)
-  function renderReferenceLogo() {
+  <script>
+    const drawCanvas = document.getElementById('drawCanvas');
+    const drawCtx = drawCanvas.getContext('2d');
     const refCanvas = document.getElementById('refCanvas');
     const refCtx = refCanvas.getContext('2d');
-    refCtx.clearRect(0, 0, 300, 300);
-    refCtx.lineWidth = 12;
+
+    let isDrawing = false;
+
+    // Drawing settings
+    drawCtx.lineWidth = 10;
+    drawCtx.lineCap = 'round';
+    drawCtx.lineJoin = 'round';
+    drawCtx.strokeStyle = '#1a202c';
+
+    refCtx.lineWidth = 10;
     refCtx.lineCap = 'round';
     refCtx.lineJoin = 'round';
-    refCtx.strokeStyle = '#1a202c';
+    refCtx.strokeStyle = '#2b6cb0';
 
-    // 1. Central Vertical Line
-    refCtx.beginPath();
-    refCtx.moveTo(150, 80);
-    refCtx.lineTo(150, 180);
-    refCtx.stroke();
-
-    // 2. Left Curved Arc
-    refCtx.beginPath();
-    refCtx.arc(110, 190, 45, Math.PI * 0.9, Math.PI * 1.95, false);
-    refCtx.stroke();
-
-    // 3. Right Curved Arc
-    refCtx.beginPath();
-    refCtx.arc(190, 190, 45, Math.PI * 1.05, Math.PI * 0.1, true);
-    refCtx.stroke();
-  }
-
-  renderReferenceLogo();
-
-  function verifyDrawing() {
-    if (!hasStrokes) {
-      statusEl.style.color = "#e53e3e";
-      statusEl.innerText = "Please draw the symbol before submitting.";
-      return;
+    // Target Emblem Blueprint (Circle + Cross)
+    function drawTargetEmblem(ctx) {
+      ctx.clearRect(0, 0, 300, 300);
+      ctx.beginPath();
+      ctx.arc(150, 150, 80, 0, Math.PI * 2); // Circle
+      ctx.moveTo(150, 70); ctx.lineTo(150, 230); // Vertical Line
+      ctx.moveTo(70, 150); ctx.lineTo(230, 150); // Horizontal Line
+      ctx.stroke();
     }
 
-    verifyBtn.disabled = true;
-    statusEl.style.color = "#d69e2e";
-    statusEl.innerText = "Analyzing emblem structure...";
+    drawTargetEmblem(refCtx);
 
-    setTimeout(() => {
-      const matchScore = calculateMatchPercentage();
-      
-      // Target tolerance threshold: 60%
-      if (matchScore >= 60) {
-        statusEl.style.color = "#38a169";
-        statusEl.innerText = `EMBLEM VERIFIED (${matchScore.toFixed(0)}% Match)! Redirecting...`;
-        setTimeout(() => {
-          window.location.href = "victory.html";
-        }, 1200);
-      } else {
-        statusEl.style.color = "#e53e3e";
-        statusEl.innerText = `REJECTED (${matchScore.toFixed(0)}% Match). Clear and try again.`;
-        verifyBtn.disabled = false;
-      }
-    }, 300);
-  }
+    // Drawing Event Handlers
+    function getPos(e) {
+      const rect = drawCanvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: clientX - rect.left, y: clientY - rect.top };
+    }
 
-  // Bounding Box Normalization & Fuzzy Line Comparison
-  function calculateMatchPercentage() {
-    const userBox = getBoundingBox(ctx, 300, 300);
-    const refCanvas = document.getElementById('refCanvas');
-    const refCtx = refCanvas.getContext('2d');
-    const refBox = getBoundingBox(refCtx, 300, 300);
+    function startDrawing(e) {
+      isDrawing = true;
+      const pos = getPos(e);
+      drawCtx.beginPath();
+      drawCtx.moveTo(pos.x, pos.y);
+    }
 
-    if (!userBox || !refBox) return 0;
+    function draw(e) {
+      if (!isDrawing) return;
+      e.preventDefault();
+      const pos = getPos(e);
+      drawCtx.lineTo(pos.x, pos.y);
+      drawCtx.stroke();
+    }
 
-    // Draw user box normalized to 64x64 grid
-    const uNorm = document.getElementById('userNormCanvas');
-    const uCtx = uNorm.getContext('2d');
-    uCtx.clearRect(0, 0, 64, 64);
-    uCtx.drawImage(canvas, userBox.x, userBox.y, userBox.w, userBox.h, 6, 6, 52, 52);
+    function stopDrawing() { isDrawing = false; }
 
-    // Draw reference box normalized to 64x64 grid
-    const rNorm = document.getElementById('refNormCanvas');
-    const rCtx = rNorm.getContext('2d');
-    rCtx.clearRect(0, 0, 64, 64);
-    rCtx.drawImage(refCanvas, refBox.x, refBox.y, refBox.w, refBox.h, 6, 6, 52, 52);
+    drawCanvas.addEventListener('mousedown', startDrawing);
+    drawCanvas.addEventListener('mousemove', draw);
+    window.addEventListener('mouseup', stopDrawing);
 
-    const uData = uCtx.getImageData(0, 0, 64, 64).data;
-    const rData = rCtx.getImageData(0, 0, 64, 64).data;
+    drawCanvas.addEventListener('touchstart', startDrawing);
+    drawCanvas.addEventListener('touchmove', draw);
+    window.addEventListener('touchend', stopDrawing);
 
-    let totalRefPixels = 0;
-    let matchedPixels = 0;
+    function clearCanvas() {
+      drawCtx.clearRect(0, 0, 300, 300);
+      document.getElementById('status').innerText = '';
+    }
 
-    for (let y = 0; y < 64; y++) {
-      for (let x = 0; x < 64; x++) {
-        const rIndex = (y * 64 + x) * 4 + 3;
-        if (rData[rIndex] > 50) { // Reference stroke pixel
-          totalRefPixels++;
-          if (hasNearbyUserPixel(uData, x, y, 4)) { // 4px tolerance radius
-            matchedPixels++;
+    // Auto-Centering and Normalizing Canvas Generator
+    function getNormalizedCanvas(sourceCanvas) {
+      const ctx = sourceCanvas.getContext('2d');
+      const imgData = ctx.getImageData(0, 0, 300, 300).data;
+
+      let minX = 300, maxX = 0, minY = 300, maxY = 0;
+      let totalPixels = 0;
+
+      for (let y = 0; y < 300; y++) {
+        for (let x = 0; x < 300; x++) {
+          const alpha = imgData[(y * 300 + x) * 4 + 3];
+          if (alpha > 50) {
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+            totalPixels++;
           }
         }
       }
+
+      if (totalPixels < 120) return null; // Dot / sparse drawing check
+
+      const cropWidth = Math.max(maxX - minX + 1, 10);
+      const cropHeight = Math.max(maxY - minY + 1, 10);
+
+      // Create an off-screen canvas to center and scale drawing
+      const normCanvas = document.createElement('canvas');
+      normCanvas.width = 300;
+      normCanvas.height = 300;
+      const normCtx = normCanvas.getContext('2d');
+
+      // Target bounding box size (200x200 centered at 150,150)
+      const targetSize = 180;
+      const scale = Math.min(targetSize / cropWidth, targetSize / cropHeight);
+
+      const destWidth = cropWidth * scale;
+      const destHeight = cropHeight * scale;
+      const destX = (300 - destWidth) / 2;
+      const destY = (300 - destHeight) / 2;
+
+      normCtx.drawImage(
+        sourceCanvas, 
+        minX, minY, cropWidth, cropHeight, 
+        destX, destY, destWidth, destHeight
+      );
+
+      return normCanvas;
     }
 
-    if (totalRefPixels === 0) return 0;
-    return Math.min(100, (matchedPixels / totalRefPixels) * 100);
-  }
+    function verifyDrawing() {
+      const status = document.getElementById('status');
 
-  function hasNearbyUserPixel(uData, cx, cy, radius) {
-    for (let dy = -radius; dy <= radius; dy++) {
-      for (let dx = -radius; dx <= radius; dx++) {
-        const nx = cx + dx;
-        const ny = cy + dy;
-        if (nx >= 0 && nx < 64 && ny >= 0 && ny < 64) {
-          const uIndex = (ny * 64 + nx) * 4 + 3;
-          if (uData[uIndex] > 50) return true;
+      // Normalize user drawing to center
+      const userNormCanvas = getNormalizedCanvas(drawCanvas);
+
+      if (!userNormCanvas) {
+        status.style.color = "#e53e3e";
+        status.innerText = "REJECTED: Drawing is too sparse or empty. Draw the full emblem!";
+        return;
+      }
+
+      // Normalize reference shape to center for identical grid comparison
+      const refNormCanvas = getNormalizedCanvas(refCanvas);
+
+      const GRID_SIZE = 32;
+      const CELL_SIZE = 300 / GRID_SIZE;
+
+      const userData = userNormCanvas.getContext('2d').getImageData(0, 0, 300, 300).data;
+      const refData = refNormCanvas.getContext('2d').getImageData(0, 0, 300, 300).data;
+
+      let userGrid = new Array(GRID_SIZE * GRID_SIZE).fill(false);
+      let refGrid = new Array(GRID_SIZE * GRID_SIZE).fill(false);
+
+      for (let y = 0; y < 300; y++) {
+        for (let x = 0; x < 300; x++) {
+          const pixelIndex = (y * 300 + x) * 4;
+          const gridIndex = Math.floor(y / CELL_SIZE) * GRID_SIZE + Math.floor(x / CELL_SIZE);
+
+          if (userData[pixelIndex + 3] > 50) userGrid[gridIndex] = true;
+          if (refData[pixelIndex + 3] > 50) refGrid[gridIndex] = true;
         }
       }
-    }
-    return false;
-  }
 
-  function getBoundingBox(context, w, h) {
-    const data = context.getImageData(0, 0, w, h).data;
-    let minX = w, minY = h, maxX = 0, maxY = 0;
-    let found = false;
+      let intersection = 0;
+      let union = 0;
 
-    for (let y = 0; y < h; y++) {
-      for (let x = 0; x < w; x++) {
-        if (data[(y * w + x) * 4 + 3] > 50) {
-          if (x < minX) minX = x;
-          if (x > maxX) maxX = x;
-          if (y < minY) minY = y;
-          if (y > maxY) maxY = y;
-          found = true;
-        }
+      for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
+        if (userGrid[i] && refGrid[i]) intersection++;
+        if (userGrid[i] || refGrid[i]) union++;
+      }
+
+      const matchScore = Math.round((intersection / union) * 100);
+      const PASS_THRESHOLD = 45; // Flexible 45%+ overlap after normalization
+
+      if (matchScore >= PASS_THRESHOLD) {
+        status.style.color = "#38a169";
+        status.innerText = `VERIFIED! Match Score: ${matchScore}%`;
+
+        localStorage.setItem('completed_stage', '6');
+
+        setTimeout(() => {
+          window.location.href = "stage7.html";
+        }, 1200);
+      } else {
+        status.style.color = "#e53e3e";
+        status.innerText = `REJECTED: Match Score ${matchScore}%. (Requires ${PASS_THRESHOLD}%+)`;
       }
     }
-    return found ? { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1 } : null;
-  }
-</script>
+  </script>
 </body>
 </html>
