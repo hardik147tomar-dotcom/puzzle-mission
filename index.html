@@ -3,54 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AGENT AUTHENTICATION HUB</title>
+  <title>IDENTITY VERIFICATION</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-
+    * { box-sizing: border-box; }
     body {
       background-color: #f5f2eb;
       color: #2d3748;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
+      margin: 0;
       padding: 24px;
     }
 
-    .container {
-      width: 100%;
-      max-width: 460px;
+    .card {
       background: #ffffff;
       border: 1px solid #e2e8f0;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+      padding: 40px;
       border-radius: 16px;
-      padding: 36px 32px;
+      width: 100%;
+      max-width: 440px;
       text-align: center;
     }
 
-    .logo-badge {
-      font-size: 36px;
+    .icon {
+      font-size: 32px;
       margin-bottom: 12px;
     }
 
-    h1 {
+    h2 {
       color: #1a202c;
-      font-size: 22px;
-      margin-bottom: 8px;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      margin: 0 0 8px 0;
+      text-transform: uppercase;
     }
 
-    p.subtext {
-      font-size: 14px;
+    p.subtitle {
+      font-size: 13px;
       color: #718096;
-      margin-bottom: 24px;
+      margin: 0 0 24px 0;
+      line-height: 1.5;
     }
 
+    /* Welcome Back Info Box */
+    .user-info-box {
+      background: #f0f4f8;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .info-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #a0aec0;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .info-username {
+      font-size: 20px;
+      font-weight: 800;
+      color: #2b6cb0;
+      margin: 4px 0;
+    }
+
+    .info-stage {
+      font-size: 12px;
+      color: #718096;
+      font-weight: 600;
+    }
+
+    /* Form Elements */
     .input-group {
       margin-bottom: 20px;
       text-align: left;
@@ -60,19 +89,17 @@
       display: block;
       font-size: 12px;
       font-weight: 700;
-      letter-spacing: 1px;
       color: #4a5568;
+      margin-bottom: 6px;
       text-transform: uppercase;
-      margin-bottom: 8px;
     }
 
     input[type="text"] {
       width: 100%;
-      padding: 14px;
+      padding: 12px 16px;
       border: 1px solid #cbd5e0;
-      border-radius: 10px;
-      font-size: 16px;
-      color: #2d3748;
+      border-radius: 8px;
+      font-size: 15px;
       outline: none;
       transition: border-color 0.2s;
     }
@@ -81,143 +108,145 @@
       border-color: #2b6cb0;
     }
 
-    .btn {
-      width: 100%;
-      padding: 14px;
-      background: #2b6cb0;
-      color: white;
-      border: none;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      border-radius: 10px;
-      transition: background 0.2s;
+    /* Buttons */
+    .btn-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
 
-    .btn:hover {
+    button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      border-radius: 8px;
+      text-transform: uppercase;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .btn-primary {
+      background: #2b6cb0;
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
       background: #2c5282;
     }
 
     .btn-secondary {
       background: #edf2f7;
       color: #4a5568;
-      border: 1px solid #cbd5e0;
-      margin-top: 10px;
     }
 
     .btn-secondary:hover {
       background: #e2e8f0;
     }
 
-    #status {
-      font-size: 13px;
-      font-weight: 600;
-      color: #e53e3e;
-      margin-top: 12px;
-      min-height: 18px;
-    }
-
-    .returning-box {
+    .btn-restart {
       background: #f7fafc;
-      border: 1px solid #e2e8f0;
-      padding: 16px;
-      border-radius: 12px;
-      margin-bottom: 20px;
+      color: #4a5568;
+      border: 1px solid #cbd5e0;
     }
 
-    .username-display {
-      font-weight: 700;
-      color: #2b6cb0;
-      font-size: 18px;
+    .btn-restart:hover {
+      background: #edf2f7;
+      color: #1a202c;
     }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="logo-badge">🕵️‍♂️</div>
-  <h1>IDENTITY VERIFICATION</h1>
-  <p class="subtext">Enter your username or agent codename to initialize your challenge session.</p>
+  <div class="card">
+    <div class="icon">🕵️</div>
+    <h2>IDENTITY VERIFICATION</h2>
+    <p class="subtitle">Enter your username or agent codename to initialize your challenge session.</p>
 
-  <!-- Section for returning users -->
-  <div id="returningUserSection" style="display: none;">
-    <div class="returning-box">
-      <div style="font-size: 12px; color: #718096; text-transform: uppercase; margin-bottom: 4px;">Welcome Back</div>
-      <div id="displayUsername" class="username-display">Agent</div>
-      <div id="displayProgress" style="font-size: 13px; color: #4a5568; margin-top: 6px;">Progress: Stage 1</div>
+    <!-- NEW USER FORM -->
+    <div id="loginForm" style="display: none;">
+      <div class="input-group">
+        <label for="usernameInput">Agent Codename</label>
+        <input type="text" id="usernameInput" placeholder="e.g. PandaSmugs" autocomplete="off">
+      </div>
+      <button class="btn-primary" onclick="startNewSession()">START CHALLENGE</button>
     </div>
-    <button class="btn" onclick="resumeChallenge()">RESUME CHALLENGE</button>
-    <button class="btn btn-secondary" onclick="switchUser()">SWITCH USERNAME</button>
+
+    <!-- RETURNING USER CARD -->
+    <div id="welcomeCard" style="display: none;">
+      <div class="user-info-box">
+        <div class="info-label">WELCOME BACK</div>
+        <div class="info-username" id="displayUsername">---</div>
+        <div class="info-stage" id="displayStage">Current Stage: 1</div>
+      </div>
+
+      <div class="btn-container">
+        <button class="btn-primary" onclick="resumeChallenge()">RESUME CHALLENGE</button>
+        <button class="btn-restart" onclick="restartFromStage1()">START AGAIN FROM STAGE 1</button>
+        <button class="btn-secondary" onclick="switchUsername()">SWITCH USERNAME</button>
+      </div>
+    </div>
   </div>
 
-  <!-- Form for new or editing users -->
-  <form id="loginForm" onsubmit="handleLogin(event)">
-    <div class="input-group">
-      <label for="usernameInput">Username / Codename</label>
-      <input type="text" id="usernameInput" placeholder="e.g. Agent_Phantom" autocomplete="off" required>
-    </div>
-    <button type="submit" class="btn">START CHALLENGE</button>
-  </form>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const username = (localStorage.getItem('username') || '').trim();
+      const completedStage = parseInt(localStorage.getItem('completed_stage') || '0');
 
-  <div id="status"></div>
-</div>
+      if (username) {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('welcomeCard').style.display = 'block';
 
-<script>
-  const stagePages = {
-    0: "stage1.html",
-    1: "stage2.html",
-    2: "stage3.html",
-    3: "scan.html",   // Stage 4
-    4: "stage5.html",
-    5: "stage6.html",
-    6: "stage7.html",
-    7: "victory.html"
-  };
+        document.getElementById('displayUsername').innerText = username;
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const savedUser = localStorage.getItem('username');
-    const completedStage = parseInt(localStorage.getItem('completed_stage') || '0');
+        // Stage Display Logic
+        const currentStage = Math.min(completedStage + 1, 7);
+        document.getElementById('displayStage').innerText = currentStage > 6 ? 'Completed All Stages' : `Current Stage: ${currentStage}`;
+      } else {
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('welcomeCard').style.display = 'none';
+      }
+    });
 
-    if (savedUser) {
-      document.getElementById('loginForm').style.display = 'none';
-      document.getElementById('returningUserSection').style.display = 'block';
-      document.getElementById('displayUsername').innerText = savedUser;
-      
-      const currentStageNum = completedStage >= 7 ? "VICTORY REACHED" : `Current Stage: ${completedStage + 1}`;
-      document.getElementById('displayProgress').innerText = currentStageNum;
-    }
-  });
-
-  function handleLogin(e) {
-    e.preventDefault();
-    const username = document.getElementById('usernameInput').value.trim();
-
-    if (!username) {
-      document.getElementById('status').innerText = "Please enter a valid username.";
-      return;
-    }
-
-    // Save username & initialize stage if first time
-    localStorage.setItem('username', username);
-    if (!localStorage.getItem('completed_stage')) {
+    // Start New Session
+    function startNewSession() {
+      const input = document.getElementById('usernameInput').value.trim();
+      if (!input) {
+        alert("Please enter a username!");
+        return;
+      }
+      localStorage.setItem('username', input);
       localStorage.setItem('completed_stage', '0');
+      window.location.href = "stage1.html";
     }
 
-    const completedStage = parseInt(localStorage.getItem('completed_stage') || '0');
-    window.location.href = stagePages[completedStage] || "stage1.html";
-  }
+    // Resume Challenge Button
+    function resumeChallenge() {
+      const completedStage = parseInt(localStorage.getItem('completed_stage') || '0');
+      const targetStage = completedStage + 1;
 
-  function resumeChallenge() {
-    const completedStage = parseInt(localStorage.getItem('completed_stage') || '0');
-    window.location.href = stagePages[completedStage] || "stage1.html";
-  }
+      if (targetStage >= 7) {
+        window.location.href = "victory.html";
+      } else {
+        window.location.href = `stage${targetStage}.html`;
+      }
+    }
 
-  function switchUser() {
-    document.getElementById('returningUserSection').style.display = 'none';
-    document.getElementById('loginForm').style.display = 'block';
-    document.getElementById('usernameInput').value = '';
-    document.getElementById('usernameInput').focus();
-  }
-</script>
+    // NEW: Start Again From Stage 1 Button
+    function restartFromStage1() {
+      localStorage.setItem('completed_stage', '0');
+      window.location.href = "stage1.html";
+    }
+
+    // Switch Username Button
+    function switchUsername() {
+      localStorage.removeItem('username');
+      localStorage.removeItem('completed_stage');
+      location.reload();
+    }
+  </script>
+
 </body>
 </html>
