@@ -2,18 +2,20 @@
 <html lang="en">
 <head>
   <script>
-  // CONFIGURATION FOR THIS FILE:
-  // Change CURRENT_STAGE to 1, 2, 3, 4, 5, 6, or 7 depending on the page
-  const CURRENT_STAGE = 7; 
+  // =========================================================
+  // CONFIGURATION FOR THIS FILE
+  // =========================================================
+  const CURRENT_STAGE = 2; // Change to 2, 3, 5, 6, etc. depending on the file
+  const MASTER_USERNAME = "PandaSmugs"; // Master bypass username
 
   const UNLOCK_DATES = {
     1: new Date(2026, 9, 1, 0, 0, 0),  // Oct 1, 12:00 AM
     2: new Date(2026, 9, 2, 0, 0, 0),  // Oct 2, 12:00 AM
     3: new Date(2026, 9, 3, 0, 0, 0),  // Oct 3, 12:00 AM
-    4: null,                            // Stage 4 (scan.html) - Unlocks instantly after Stage 3
+    4: null,                            // Stage 4 (scan.html) - Immediate after Stage 3
     5: new Date(2026, 9, 4, 0, 0, 0),  // Oct 4, 12:00 AM
     6: new Date(2026, 9, 5, 0, 0, 0),  // Oct 5, 12:00 AM
-    7: null                             // Stage 7 - Unlocks instantly after Stage 6
+    7: null                             // Stage 7 & Victory - Immediate after Stage 6
   };
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -27,16 +29,20 @@
       return;
     }
 
+    // Check if current user is the master admin
+    const isMasterUser = username.trim().toLowerCase() === MASTER_USERNAME.toLowerCase();
+
     // 2. Check Prerequisite Progress
-    if (completedStage < requiredPreviousStage) {
+    if (!isMasterUser && completedStage < requiredPreviousStage) {
       showLockOverlay(`Stage ${requiredPreviousStage} Required`, `Agent ${username}, you must complete Stage ${requiredPreviousStage} before accessing this stage.`);
       return;
     }
 
-    // 3. Check Date Unlock Schedule
+    // 3. Check Date Unlock Schedule (BYPASSED IF MASTER USER)
     const targetDate = UNLOCK_DATES[CURRENT_STAGE];
     const now = new Date();
-    if (targetDate && now < targetDate) {
+
+    if (!isMasterUser && targetDate && now < targetDate) {
       renderCountdownOverlay(targetDate, username);
     }
   });
