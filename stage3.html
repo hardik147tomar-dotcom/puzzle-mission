@@ -5,7 +5,7 @@
   // =========================================================
   // CONFIGURATION FOR THIS FILE
   // =========================================================
-  const CURRENT_STAGE = 3; // Change to 2, 3, 5, 6, etc. depending on the file
+  const CURRENT_STAGE = 3; 
   const MASTER_USERNAME = "PandaSmugs"; // Master bypass username
 
   const UNLOCK_DATES = {
@@ -237,6 +237,12 @@
         if (birdFound) {
           status.style.color = "#38a169";
           status.innerText = "VERIFIED! Bird detected.";
+
+          // =========================================================
+          // SAVE STAGE 3 PROGRESS BEFORE REDIRECTING TO SCAN.HTML
+          // =========================================================
+          localStorage.setItem('completed_stage', '3');
+
           setTimeout(() => {
             window.location.href = "scan.html";
           }, 1000);
