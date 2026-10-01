@@ -148,19 +148,14 @@
     function checkAnswer() {
       const val = document.getElementById('answer').value.trim().toLowerCase();
       const validAnswers = ['fire', 'a fire', 'the fire'];
-      if (validAnswers.includes(val)) {
+      if (validAnswers.includes(val))
+        localStorage.setItem('completed_stage', '1');
+      {
         window.location.href = "stage2.html";
       } else {
         alert("INCORRECT KEY. Translate the Morse code banner on top for a hint.");
       }
     }
-   function completeStage1() {
-  // 1. Save Stage 1 as completed in the browser
-  localStorage.setItem('completed_stage', '1');
-
-  // 2. Redirect to Stage 2
-  window.location.href = "stage2.html";
-}
   </script>
  
 </body>
