@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    const CURRENT_STAGE = 7;
+    const MASTER_USERNAME = "PandaSmugs";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const username = localStorage.getItem('username');
+      const completedStage = parseInt(localStorage.getItem('completed_stage') || '0');
+
+      if (!username) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      const isMasterUser = username.trim().toLowerCase() === MASTER_USERNAME.toLowerCase();
+
+      if (!isMasterUser && completedStage < (CURRENT_STAGE - 1)) {
+        alert(`Agent ${username}, you must complete Stage ${CURRENT_STAGE - 1} first.`);
+        window.location.href = "index.html";
+      }
+    });
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STAGE 7 - SOURCE INSPECTION</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { background-color: #f5f2eb; color: #2d3748; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 16px; }
+    .stage-badge { font-size: 14px; font-weight: 700; letter-spacing: 2px; color: #718096; text-transform: uppercase; margin-bottom: 12px; }
+    .warning-box { background: #fff5f5; border: 2px solid #feb2b2; border-radius: 12px; padding: 16px; margin-bottom: 20px; text-align: center; max-width: 520px; width: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+    .warning-title { color: #c53030; font-weight: 800; font-size: 15px; letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; }
+    .warning-text { color: #9b2c2c; font-size: 13px; line-height: 1.5; margin: 0; }
+    .card { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); padding: 32px; border-radius: 16px; width: 100%; max-width: 520px; text-align: center; }
+    h2 { color: #1a202c; margin-top: 0; font-size: 22px; margin-bottom: 8px; }
+    p.hint { font-size: 14px; color: #718096; margin-bottom: 24px; line-height: 1.5; }
+    .terminal-box { background: #1a202c; color: #63b3ed; font-family: monospace; padding: 16px; border-radius: 8px; font-size: 13px; text-align: left; margin-bottom: 24px; border-left: 4px solid #3182ce; }
+    input[type="text"] { width: 100%; padding: 14px; margin-bottom: 12px; border: 2px solid #cbd5e0; font-size: 16px; border-radius: 8px; text-align: center; outline: none; }
+    input[type="text"]:focus { border-color: #3182ce; }
+    button { padding: 14px; background: #2b6cb0; color: white; border: none; font-size: 16px; font-weight: 600; cursor: pointer; border-radius: 8px; width: 100%; }
+  </style>
+</head>
+<body>
+
+  <div class="stage-badge">STAGE 7</div>
+
+  <div class="warning-box">
+    <div class="warning-title">⚠️ CLASSIFIED NOTICE</div>
+    <p class="warning-text">Focus on every codename you discover from here on. You will need them to create a final statement at <strong>Stage 10</strong>!</p>
+  </div>
+
+  <div class="card">
+    <h2>[ STAGE 7: DEVTOL INSPECTION ]</h2>
+    <p class="hint">The server payload has been intercepted. Inspect the page elements or developer tools to uncover the hidden key.</p>
+
+    <!-- HIDDEN CODENAME FOR DEVTOLS INSPECTION: ALPHA -->
+
+    <div class="terminal-box">
+      > STATUS: ENCRYPTED_PAYLOAD_LOADED<br>
+      > HINT: Inspect page DOM elements (F12 / Right Click -> Inspect)...
+    </div>
+
+    <input type="text" id="answer" placeholder="Enter discovered codename..." autocomplete="off">
+    <button onclick="checkAnswer()">SUBMIT CODENAME</button>
+  </div>
+
+  <script>
+    function checkAnswer() {
+      const val = document.getElementById('answer').value.trim().toLowerCase();
+      if (val === 'alpha') {
+        localStorage.setItem('completed_stage', '7');
+        window.location.href = "stage8.html";
+      } else {
+        alert("INCORRECT CODENAME. Inspect the page source code (F12) to find the hidden comment!");
+      }
+    }
+  </script>
+</body>
+</html>
