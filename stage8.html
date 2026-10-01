@@ -2,8 +2,24 @@
 <html lang="en">
 <head>
   <script>
-    const CURRENT_STAGE = 8;
-    const MASTER_USERNAME = "PandaSmugs";
+     // =========================================================
+    // CONFIGURATION FOR THIS FILE
+    // =========================================================
+    const CURRENT_STAGE = 10; // Final Victory Stage
+    const MASTER_USERNAME = "PandaSmugs"; // Master bypass username
+
+    const UNLOCK_DATES = {
+      1: new Date(2026, 9, 1, 0, 0, 0),  // Oct 1, 12:00 AM
+      2: new Date(2026, 9, 2, 0, 0, 0),  // Oct 2, 12:00 AM
+      3: new Date(2026, 9, 3, 0, 0, 0),  // Oct 3, 12:00 AM
+      4: null,                            // Stage 4 (scan.html) - Immediate after Stage 3
+      5: new Date(2026, 9, 4, 0, 0, 0),  // Oct 4, 12:00 AM
+      6: new Date(2026, 9, 5, 0, 0, 0),  // Oct 5, 12:00 AM
+      7: new Date(2026, 9, 6, 0, 0, 0),  // Oct 6, 12:00 AM
+      8: new Date(2026, 9, 7, 0, 0, 0),  // Oct 7, 12:00 AM
+      9: new Date(2026, 9, 8, 0, 0, 0),  // Oct 8, 12:00 AM
+      10: null                            // Stage 10 & Victory - Immediate after Stage 9
+    };
 
     document.addEventListener("DOMContentLoaded", () => {
       const username = localStorage.getItem('username');
