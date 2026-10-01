@@ -164,6 +164,7 @@
       ];
 
       if (email === validEmail && location === validLocation && validTwitter.includes(twitter)) {
+        localStorage.setItem('completed_stage', '2'); // Replace X with that file's stage number
         window.location.href = "stage3.html";
       } else {
         alert("ONE OR MORE FIELDS ARE INCORRECT. Re-check all 3 entries.");
