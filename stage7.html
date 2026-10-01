@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <script>
-      // =========================================================
+       // =========================================================
     // CONFIGURATION FOR THIS FILE
     // =========================================================
     const CURRENT_STAGE = 7; // Final Victory Stage
@@ -40,7 +40,7 @@
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>STAGE 7 - SOURCE INSPECTION</title>
+  <title>STAGE 7 - REPOSITORY RECON</title>
   <style>
     * { box-sizing: border-box; }
     body { background-color: #f5f2eb; color: #2d3748; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 16px; }
@@ -51,7 +51,8 @@
     .card { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); padding: 32px; border-radius: 16px; width: 100%; max-width: 520px; text-align: center; }
     h2 { color: #1a202c; margin-top: 0; font-size: 22px; margin-bottom: 8px; }
     p.hint { font-size: 14px; color: #718096; margin-bottom: 24px; line-height: 1.5; }
-    .terminal-box { background: #1a202c; color: #63b3ed; font-family: monospace; padding: 16px; border-radius: 8px; font-size: 13px; text-align: left; margin-bottom: 24px; border-left: 4px solid #3182ce; }
+    .github-box { background: #1a202c; color: #e2e8f0; font-family: monospace; padding: 18px; border-radius: 10px; font-size: 13px; text-align: left; margin-bottom: 24px; border-left: 4px solid #3182ce; line-height: 1.6; }
+    .github-box a { color: #63b3ed; text-decoration: underline; word-break: break-all; font-weight: bold; }
     input[type="text"] { width: 100%; padding: 14px; margin-bottom: 12px; border: 2px solid #cbd5e0; font-size: 16px; border-radius: 8px; text-align: center; outline: none; }
     input[type="text"]:focus { border-color: #3182ce; }
     button { padding: 14px; background: #2b6cb0; color: white; border: none; font-size: 16px; font-weight: 600; cursor: pointer; border-radius: 8px; width: 100%; }
@@ -67,14 +68,13 @@
   </div>
 
   <div class="card">
-    <h2>[ STAGE 7: DEVTOL INSPECTION ]</h2>
-    <p class="hint">The server payload has been intercepted. Inspect the page elements or developer tools to uncover the hidden key.</p>
+    <h2>[ STAGE 7: GITHUB RECON ]</h2>
+    <p class="hint">The key has been hidden deep inside one of the public GitHub repositories. Check all folders and files across the profile to find it!</p>
 
-    <!-- HIDDEN CODENAME FOR DEVTOLS INSPECTION: ALPHA -->
-
-    <div class="terminal-box">
-      > STATUS: ENCRYPTED_PAYLOAD_LOADED<br>
-      > HINT: Inspect page DOM elements (F12 / Right Click -> Inspect)...
+    <div class="github-box">
+      > 📂 <b>TARGET PROFILE:</b><br>
+      <a href="https://github.com/PandaSmugs" target="_blank" rel="noopener noreferrer">https://github.com/PandaSmugs</a><br><br>
+      > 💡 <b>HINT:</b> Check all public repositories and subfolders on GitHub to uncover the answer.
     </div>
 
     <input type="text" id="answer" placeholder="Enter discovered codename..." autocomplete="off">
@@ -88,7 +88,7 @@
         localStorage.setItem('completed_stage', '7');
         window.location.href = "stage8.html";
       } else {
-        alert("INCORRECT CODENAME. Inspect the page source code (F12) to find the hidden comment!");
+        alert("INCORRECT CODENAME. Check all folders across all GitHub repositories on the profile!");
       }
     }
   </script>
