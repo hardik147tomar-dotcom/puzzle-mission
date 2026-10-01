@@ -141,6 +141,7 @@
     function checkFinal() {
       const val = document.getElementById('password').value.trim().toLowerCase();
       if (val === 'phantom') {
+        localStorage.setItem('completed_stage', '5'); // Replace X with that file's stage number
         window.location.href = "stage6.html";
       } else {
         alert("ACCESS DENIED: Incorrect password.");
