@@ -1,1 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    const CURRENT_STAGE = 8;
+    const MASTER_USERNAME = "PandaSmugs";
 
+    document.addEventListener("DOMContentLoaded", () => {
+      const username = localStorage.getItem('username');
+      const completedStage = parseInt(localStorage.getItem('completed_stage') || '0');
+
+      if (!username) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      const isMasterUser = username.trim().toLowerCase() === MASTER_USERNAME.toLowerCase();
+
+      if (!isMasterUser && completedStage < (CURRENT_STAGE - 1)) {
+        alert(`Agent ${username}, you must complete Stage ${CURRENT_STAGE - 1} first.`);
+        window.location.href = "index.html";
+      }
+    });
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STAGE 8 - OSINT INTEL</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { background-color: #f5f2eb; color: #2d3748; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 16px; }
+    .stage-badge { font-size: 14px; font-weight: 700; letter-spacing: 2px; color: #718096; text-transform: uppercase; margin-bottom: 12px; }
+    .card { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); padding: 32px; border-radius: 16px; width: 100%; max-width: 520px; text-align: center; }
+    h2 { color: #1a202c; margin-top: 0; font-size: 22px; margin-bottom: 8px; }
+    p.hint { font-size: 14px; color: #4a5568; margin-bottom: 20px; line-height: 1.6; }
+    .osint-card { background: #f8fafc; border: 1px dashed #cbd5e0; padding: 18px; border-radius: 10px; margin-bottom: 20px; text-align: left; font-size: 14px; color: #2d3748; }
+    .osint-card b { color: #2b6cb0; }
+    input[type="text"] { width: 100%; padding: 14px; margin-bottom: 12px; border: 2px solid #cbd5e0; font-size: 16px; border-radius: 8px; text-align: center; outline: none; }
+    input[type="text"]:focus { border-color: #3182ce; }
+    button { padding: 14px; background: #2b6cb0; color: white; border: none; font-size: 16px; font-weight: 600; cursor: pointer; border-radius: 8px; width: 100%; }
+  </style>
+</head>
+<body>
+
+  <div class="stage-badge">STAGE 8</div>
+
+  <div class="card">
+    <h2>[ STAGE 8: INTEL DOSSIER ]</h2>
+    <p class="hint">Identify the music composer behind the iconic ambient game soundscapes (e.g. <i>Sweden</i>, <i>Subwoofer Lullaby</i>, <i>Mice on Venus</i>).</p>
+
+    <div class="osint-card">
+      <b>OSINT TASK:</b><br>
+      Who is the German musician/composer famously known for composing the original ambient soundtrack for Minecraft?
+    </div>
+
+    <input type="text" id="answer" placeholder="Enter composer / artist name..." autocomplete="off">
+    <button onclick="checkAnswer()">SUBMIT ANSWER</button>
+  </div>
+
+  <script>
+    function checkAnswer() {
+      const val = document.getElementById('answer').value.trim().toLowerCase();
+      const validAnswers = ['c418', 'daniel', 'daniel rosenfeld'];
+
+      if (validAnswers.includes(val)) {
+        alert("CORRECT! Codename revealed: BRAVO");
+        localStorage.setItem('completed_stage', '8');
+        window.location.href = "stage9.html";
+      } else {
+        alert("INCORRECT COMPOSER. Hint: Think of C418 or his real first name!");
+      }
+    }
+  </script>
+</body>
+</html>
