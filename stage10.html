@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    const CURRENT_STAGE = 10;
+    const MASTER_USERNAME = "PandaSmugs";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const username = localStorage.getItem('username');
+      const completedStage = parseInt(localStorage.getItem('completed_stage') || '0');
+
+      if (!username) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      const isMasterUser = username.trim().toLowerCase() === MASTER_USERNAME.toLowerCase();
+
+      if (!isMasterUser && completedStage < (CURRENT_STAGE - 1)) {
+        alert(`Agent ${username}, you must complete Stage ${CURRENT_STAGE - 1} first.`);
+        window.location.href = "index.html";
+      }
+    });
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STAGE 10 - FINAL OVERRIDE</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { background-color: #f5f2eb; color: #2d3748; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 16px; }
+    .stage-badge { font-size: 14px; font-weight: 700; letter-spacing: 2px; color: #718096; text-transform: uppercase; margin-bottom: 12px; }
+    .card { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); padding: 32px; border-radius: 16px; width: 100%; max-width: 520px; text-align: center; }
+    h2 { color: #1a202c; margin-top: 0; font-size: 22px; margin-bottom: 8px; }
+    p.hint { font-size: 14px; color: #718096; margin-bottom: 24px; line-height: 1.5; }
+    .statement-box { background: #f8fafc; border: 1px solid #cbd5e0; padding: 18px; border-radius: 10px; margin-bottom: 24px; font-family: monospace; font-size: 14px; color: #2d3748; text-align: left; }
+    input[type="text"] { width: 100%; padding: 14px; margin-bottom: 12px; border: 2px solid #cbd5e0; font-size: 16px; border-radius: 8px; text-align: center; outline: none; }
+    input[type="text"]:focus { border-color: #3182ce; }
+    button { padding: 14px; background: #22c55e; color: white; border: none; font-size: 16px; font-weight: 700; cursor: pointer; border-radius: 8px; width: 100%; }
+    button:hover { background: #16a34a; }
+  </style>
+</head>
+<body>
+
+  <div class="stage-badge">FINAL STAGE 10</div>
+
+  <div class="card">
+    <h2>[ STAGE 10: FINAL STATEMENT ]</h2>
+    <p class="hint">Recall the three codenames recovered from Stages 7, 8, and 9 to initialize final system unlock.</p>
+
+    <div class="statement-box">
+      <b>REQUIRED SEQUENCE:</b><br>
+      Enter all 3 codenames in order separated by spaces (e.g. <i>[codename7] [codename8] [codename9]</i>).
+    </div>
+
+    <input type="text" id="answer" placeholder="Enter full statement..." autocomplete="off">
+    <button onclick="checkAnswer()">INITIALIZE OVERRIDE</button>
+  </div>
+
+  <script>
+    function checkAnswer() {
+      const rawInput = document.getElementById('answer').value.trim().toLowerCase();
+      // Clean commas or multiple spaces
+      const normalizedInput = rawInput.replace(/,/g, '').replace(/\s+/g, ' ');
+
+      if (normalizedInput === "alpha bravo charlie") {
+        localStorage.setItem('completed_stage', '10');
+        window.location.href = "victory.html";
+      } else {
+        alert("ACCESS DENIED: Incorrect statement. Check your codenames from Stages 7, 8, and 9!");
+      }
+    }
+  </script>
+</body>
+</html>
