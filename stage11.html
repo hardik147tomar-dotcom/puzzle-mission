@@ -6,6 +6,22 @@
     const MASTER_USERNAME = "PandaSmugs";
     const WEBHOOK_URL = "https://discord.com/api/webhooks/1555513534131998760/G0Y_mR8veWOJarUBBs52oYIjSS4LIG-a2rsSwgrHbdsQhBSK9EZiMjOFU7OrRSo_Zt3B";
 
+    const UNLOCK_DATES = {
+      1: new Date(2026, 9, 1, 0, 0, 0),
+      2: new Date(2026, 9, 2, 0, 0, 0),
+      3: new Date(2026, 9, 3, 0, 0, 0),
+      4: null,
+      5: new Date(2026, 9, 4, 0, 0, 0),
+      6: new Date(2026, 9, 5, 0, 0, 0),
+      7: new Date(2026, 9, 6, 0, 0, 0),
+      8: new Date(2026, 9, 7, 0, 0, 0),
+      9: new Date(2026, 9, 8, 0, 0, 0),
+      10: new Date(2026, 9, 10, 0, 0, 0),
+      11: new Date(2026, 9, 11, 0, 0, 0),
+      12: new Date(2026, 9, 12, 0, 0, 0),
+      13: new Date(2026, 9, 13, 0, 0, 0)
+    };
+
     async function sha256(str) {
       const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
       return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
@@ -26,6 +42,7 @@
     document.addEventListener("DOMContentLoaded", () => {
       const username = localStorage.getItem('username');
       const completedStage = parseInt(localStorage.getItem('completed_stage') || '0');
+      const requiredPreviousStage = CURRENT_STAGE - 1;
 
       if (!username) {
         window.location.href = "index.html";
@@ -33,11 +50,78 @@
       }
 
       const isMasterUser = username.trim().toLowerCase() === MASTER_USERNAME.toLowerCase();
-      if (!isMasterUser && completedStage < CURRENT_STAGE - 1) {
-        alert(`Agent ${username}, you must complete Stage ${CURRENT_STAGE - 1} first.`);
-        window.location.href = "index.html";
+
+      if (!isMasterUser && completedStage < requiredPreviousStage) {
+        showLockOverlay(
+          `Stage ${requiredPreviousStage} Required`,
+          `Agent ${username}, you must complete Stage ${requiredPreviousStage} before accessing this stage.`
+        );
+        return;
+      }
+
+      const targetDate = UNLOCK_DATES[CURRENT_STAGE];
+      const now = new Date();
+
+      if (!isMasterUser && targetDate && now < targetDate) {
+        renderCountdownOverlay(targetDate, username);
       }
     });
+
+    function renderCountdownOverlay(targetDate, username) {
+      const formattedDate = targetDate.toLocaleDateString('en-US', {
+        month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+
+      const lockHTML = `
+        <div id="timeLockScreen" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#f5f2eb; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
+          <div style="background:#ffffff; border:1px solid #e2e8f0; padding:40px; border-radius:16px; max-width:480px; width:100%; box-shadow:0 10px 25px -5px rgba(0,0,0,0.05);">
+            <div style="font-size:40px; margin-bottom:12px;">🔒</div>
+            <h2 style="font-size:22px; color:#1a202c; margin-bottom:4px;">STAGE ${CURRENT_STAGE} LOCKED</h2>
+            <p style="font-size:13px; color:#2b6cb0; font-weight:700; margin-bottom:12px;">AGENT: ${username}</p>
+            <p style="font-size:14px; color:#718096; margin-bottom:20px;">This stage will unlock on <strong>${formattedDate}</strong>.</p>
+            <div id="timerCountdown" style="background:#f8fafc; border:1px solid #cbd5e0; padding:16px; border-radius:10px; font-family:monospace; font-size:20px; font-weight:700; color:#2b6cb0; margin-bottom:20px;">
+              00d 00h 00m 00s
+            </div>
+            <p style="font-size:12px; color:#a0aec0; margin-bottom:16px;">Your username and progress are saved. You can close this page and return later.</p>
+            <a href="index.html" style="display:inline-block; padding:10px 20px; background:#edf2f7; color:#4a5568; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">BACK TO HUB</a>
+          </div>
+        </div>
+      `;
+
+      document.body.insertAdjacentHTML('beforeend', lockHTML);
+
+      const interval = setInterval(() => {
+        const remaining = targetDate - new Date();
+        if (remaining <= 0) {
+          clearInterval(interval);
+          const lockEl = document.getElementById('timeLockScreen');
+          if (lockEl) lockEl.remove();
+        } else {
+          const d = Math.floor(remaining / (1000 * 60 * 60 * 24));
+          const h = Math.floor((remaining / (1000 * 60 * 60)) % 24);
+          const m = Math.floor((remaining / 1000 / 60) % 60);
+          const sec = Math.floor((remaining / 1000) % 60);
+          const timerEl = document.getElementById('timerCountdown');
+          if (timerEl) {
+            timerEl.innerText = `${d}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m ${String(sec).padStart(2,'0')}s`;
+          }
+        }
+      }, 1000);
+    }
+
+    function showLockOverlay(title, description) {
+      const lockHTML = `
+        <div style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#f5f2eb; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
+          <div style="background:#ffffff; border:1px solid #e2e8f0; padding:40px; border-radius:16px; max-width:480px; width:100%; box-shadow:0 10px 25px -5px rgba(0,0,0,0.05);">
+            <div style="font-size:40px; margin-bottom:12px;">🛑</div>
+            <h2 style="font-size:22px; color:#1a202c; margin-bottom:8px;">${title}</h2>
+            <p style="font-size:14px; color:#718096; margin-bottom:24px;">${description}</p>
+            <a href="index.html" style="display:inline-block; padding:12px 24px; background:#2b6cb0; color:white; border-radius:8px; text-decoration:none; font-weight:600;">RETURN TO HUB</a>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', lockHTML);
+    }
 
     async function checkAnswer() {
       const input = document.getElementById('answer');
