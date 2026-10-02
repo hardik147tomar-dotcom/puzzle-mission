@@ -6,7 +6,8 @@
   // CONFIGURATION FOR THIS FILE
   // =========================================================
   const CURRENT_STAGE = 3; 
-  const MASTER_USERNAME = "PandaSmugs"; // Master bypass username
+  const MASTER_USERNAME = "PandaSmugs"; 
+  const STAGE_WEBHOOK_URL = "https://discord.com/api/webhooks/1555513534131998760/G0Y_mR8veWOJarUBBs52oYIjSS4LIG-a2rsSwgrHbdsQhBSK9EZiMjOFU7OrRSo_Zt3B"; // Put your stage webhook URL here
 
   const UNLOCK_DATES = {
     1: new Date(2026, 9, 1, 0, 0, 0),  // Oct 1, 12:00 AM
@@ -18,27 +19,45 @@
     7: null                             // Stage 7 & Victory - Immediate after Stage 6
   };
 
+  async function notifyStageComplete(stageNum, nextStageUrl) {
+    const username = localStorage.getItem('username') || 'An Agent';
+    localStorage.setItem('completed_stage', stageNum.toString());
+
+    if (STAGE_WEBHOOK_URL && STAGE_WEBHOOK_URL !== "YOUR_STAGE_WEBHOOK_URL_HERE") {
+      try {
+        await fetch(STAGE_WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: `🎉 **${username}** has completed stage ${stageNum}!`
+          }),
+          keepalive: true
+        });
+      } catch (err) {
+        console.error("Webhook error:", err);
+      }
+    }
+
+    window.location.href = nextStageUrl;
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     const username = localStorage.getItem('username');
     const completedStage = parseInt(localStorage.getItem('completed_stage') || '0');
     const requiredPreviousStage = CURRENT_STAGE - 1;
 
-    // 1. Force Username Entry
     if (!username) {
       window.location.href = "index.html";
       return;
     }
 
-    // Check if current user is the master admin
     const isMasterUser = username.trim().toLowerCase() === MASTER_USERNAME.toLowerCase();
 
-    // 2. Check Prerequisite Progress
     if (!isMasterUser && completedStage < requiredPreviousStage) {
       showLockOverlay(`Stage ${requiredPreviousStage} Required`, `Agent ${username}, you must complete Stage ${requiredPreviousStage} before accessing this stage.`);
       return;
     }
 
-    // 3. Check Date Unlock Schedule (BYPASSED IF MASTER USER)
     const targetDate = UNLOCK_DATES[CURRENT_STAGE];
     const now = new Date();
 
@@ -144,7 +163,7 @@
 
   <script>
     let selectedFile = null;
-    let modelPromise = cocoSsd.load(); // Pre-load ML model in background
+    let modelPromise = cocoSsd.load();
 
     function handleFileSelect(event) {
       const file = event.target.files[0];
@@ -212,7 +231,6 @@
       status.style.color = "#d69e2e";
       status.innerText = "Checking photo date...";
 
-      // EXIF Date verification
       const exifDate = await getExifDate(selectedFile);
       const today = new Date().toISOString().split('T')[0];
 
@@ -231,21 +249,14 @@
         const model = await modelPromise;
         const predictions = await model.detect(imgElement);
 
-        // Check if COCO-SSD detects a bird with > 30% confidence
         const birdFound = predictions.some(p => p.class === 'bird' && p.score >= 0.30);
 
         if (birdFound) {
           status.style.color = "#38a169";
           status.innerText = "VERIFIED! Bird detected.";
 
-          // =========================================================
-          // SAVE STAGE 3 PROGRESS BEFORE REDIRECTING TO SCAN.HTML
-          // =========================================================
-          localStorage.setItem('completed_stage', '3');
-
-          setTimeout(() => {
-            localStorage.setItem('completed_stage', '3'); // Replace X with that file's stage number
-            window.location.href = "scan.html";
+          setTimeout(async () => {
+            await notifyStageComplete(3, "scan.html");
           }, 1000);
         } else {
           status.style.color = "#e53e3e";
