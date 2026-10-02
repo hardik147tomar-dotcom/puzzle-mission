@@ -1,118 +1,66 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <script>
-     // =========================================================
-    // CONFIGURATION FOR THIS FILE
-    // =========================================================
-    const CURRENT_STAGE = 10; // Final Victory Stage
-    const MASTER_USERNAME = "PandaSmugs"; // Master bypass username
-    const WEBHOOK_URL = "https://discord.com/api/webhooks/1555513534131998760/G0Y_mR8veWOJarUBBs52oYIjSS4LIG-a2rsSwgrHbdsQhBSK9EZiMjOFU7OrRSo_Zt3B"; // Insert your Webhook URL here
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>STAGE 10</title>
+<script>
+const CURRENT_STAGE=10;
+const MASTER_USERNAME="PandaSmugs";
+const WEBHOOK_URL='https://discord.com/api/webhooks/1555513534131998760/G0Y_mR8veWOJarUBBs52oYIjSS4LIG-a2rsSwgrHbdsQhBSK9EZiMjOFU7OrRSo_Zt3B';
+const UNLOCK_DATE=new Date(2026,9,9,0,0,0);
 
-     const UNLOCK_DATES = {
-      1: new Date(2026, 9, 1, 0, 0, 0),
-      2: new Date(2026, 9, 2, 0, 0, 0),
-      3: new Date(2026, 9, 3, 0, 0, 0),
-      4: null,
-      5: new Date(2026, 9, 4, 0, 0, 0),
-      6: new Date(2026, 9, 5, 0, 0, 0),
-      7: new Date(2026, 9, 6, 0, 0, 0),
-      8: new Date(2026, 9, 7, 0, 0, 0),
-      9: new Date(2026, 9, 8, 0, 0, 0),
-      10: new Date(2026, 9, 9, 0, 0, 0),
-      11: new Date(2026, 9, 10, 0, 0, 0),
-      12: new Date(2026, 9, 11, 0, 0, 0),
-      13: new Date(2026, 9, 12, 0, 0, 0)
-    };
+async function sha256(str) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
+}
+async function sendWebhook(stageNum) {
+  const username = localStorage.getItem("username") || "Unknown Agent";
+  try {
+    await fetch(WEBHOOK_URL,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({content:`🎯 **Agent ${username}** has successfully completed **Stage ${stageNum}**!`}),keepalive:true});
+  } catch(e) { console.error("Webhook error:",e); }
+}
+function showLockOverlay(title, description) {
+  document.body.insertAdjacentHTML("beforeend",`
+    <div class="lock-screen"><div class="lock-card">
+      <div class="lock-icon">🛑</div><h2>${title}</h2><p>${description}</p>
+      <a href="index.html" class="hub-button">RETURN TO HUB</a>
+    </div></div>`);
+}
+function renderCountdownOverlay(targetDate, username) {
+  const formattedDate=targetDate.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric",hour:"2-digit",minute:"2-digit"});
+  document.body.insertAdjacentHTML("beforeend",`
+    <div id="timeLockScreen" class="lock-screen"><div class="lock-card">
+      <div class="lock-icon">🔒</div><h2>STAGE ${CURRENT_STAGE} LOCKED</h2>
+      <p class="agent-name">AGENT: ${username}</p>
+      <p>This stage will unlock on <strong>${formattedDate}</strong>.</p>
+      <div id="timerCountdown" class="countdown">00d 00h 00m 00s</div>
+      <p class="small-note">Your username and progress are saved. You can close this page and return later.</p>
+      <a href="index.html" class="back-button">BACK TO HUB</a>
+    </div></div>`);
+  const interval=setInterval(()=>{
+    const r=targetDate-new Date();
+    if(r<=0){clearInterval(interval);document.getElementById("timeLockScreen")?.remove();return;}
+    const d=Math.floor(r/86400000),h=Math.floor(r/3600000)%24,m=Math.floor(r/60000)%60,s=Math.floor(r/1000)%60;
+    const el=document.getElementById("timerCountdown");
+    if(el) el.textContent=`${String(d).padStart(2,"0")}d ${String(h).padStart(2,"0")}h ${String(m).padStart(2,"0")}m ${String(s).padStart(2,"0")}s`;
+  },1000);
+}
+document.addEventListener("DOMContentLoaded",()=>{
+  const username=localStorage.getItem("username");
+  const completed=parseInt(localStorage.getItem("completed_stage")||"0",10);
+  if(!username){window.location.href="index.html";return;}
+  const master=username.trim().toLowerCase()===MASTER_USERNAME.toLowerCase();
+  const required=CURRENT_STAGE-1;
+  if(!master && completed<required){
+    showLockOverlay(`Stage ${required} Required`,`Agent ${username}, you must complete Stage ${required} before accessing this stage.`);
+    return;
+  }
+  if(!master && UNLOCK_DATE && new Date()<UNLOCK_DATE) renderCountdownOverlay(UNLOCK_DATE,username);
+});
 
-    async function sendWebhook(stageNum) {
-      if (!WEBHOOK_URL || WEBHOOK_URL === "YOUR_WEBHOOK_URL_HERE") return;
-      const username = localStorage.getItem('username') || 'Unknown Agent';
-      try {
-        await fetch(WEBHOOK_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            content: `🎯 **Agent ${username}** has successfully completed **Stage ${stageNum}**!`
-          }),
-          keepalive: true
-        });
-      } catch (e) {
-        console.error("Webhook error:", e);
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const username = localStorage.getItem('username');
-      const completedStage = parseInt(localStorage.getItem('completed_stage') || '0');
-
-      if (!username) {
-        window.location.href = "index.html";
-        return;
-      }
-
-      const isMasterUser = username.trim().toLowerCase() === MASTER_USERNAME.toLowerCase();
-
-      if (!isMasterUser && completedStage < (CURRENT_STAGE - 1)) {
-        alert(`Agent ${username}, you must complete Stage ${CURRENT_STAGE - 1} first.`);
-        window.location.href = "index.html";
-      }
-    });
-  </script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>STAGE 10 - FINAL OVERRIDE</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { background-color: #f5f2eb; color: #2d3748; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 16px; }
-    .stage-badge { font-size: 14px; font-weight: 700; letter-spacing: 2px; color: #718096; text-transform: uppercase; margin-bottom: 12px; }
-    .card { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); padding: 32px; border-radius: 16px; width: 100%; max-width: 520px; text-align: center; }
-    h2 { color: #1a202c; margin-top: 0; font-size: 22px; margin-bottom: 8px; }
-    p.hint { font-size: 14px; color: #718096; margin-bottom: 24px; line-height: 1.5; }
-    .statement-box { background: #f8fafc; border: 1px solid #cbd5e0; padding: 18px; border-radius: 10px; margin-bottom: 24px; font-family: monospace; font-size: 14px; color: #2d3748; text-align: left; }
-    input[type="text"] { width: 100%; padding: 14px; margin-bottom: 12px; border: 2px solid #cbd5e0; font-size: 16px; border-radius: 8px; text-align: center; outline: none; }
-    input[type="text"]:focus { border-color: #3182ce; }
-    button { padding: 14px; background: #22c55e; color: white; border: none; font-size: 16px; font-weight: 700; cursor: pointer; border-radius: 8px; width: 100%; }
-    button:hover { background: #16a34a; }
-  </style>
-</head>
-<body>
-
-  <div class="stage-badge">FINAL STAGE 10</div>
-
-  <div class="card">
-    <h2>[ STAGE 10: FINAL STATEMENT ]</h2>
-    <p class="hint">Recall the three codenames recovered from Stages 7, 8, and 9 to initialize final system unlock.</p>
-
-    <div class="statement-box">
-      <b>REQUIRED SEQUENCE:</b><br>
-      Enter all 3 codenames in order separated by spaces (e.g. <i>[codename7] [codename8] [codename9]</i>).
-    </div>
-
-    <input type="text" id="answer" placeholder="Enter full statement..." autocomplete="off">
-    <button onclick="checkAnswer()">INITIALIZE OVERRIDE</button>
-  </div>
-
-  <script>
-        async function sha256(str) {
-      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
-    }
-
-async function checkAnswer() {
-      const rawInput = document.getElementById('answer').value.trim().toLowerCase();
-      const normalizedInput = rawInput.replace(/,/g, '').replace(/\s+/g, ' ');
-      const inputHash = await sha256(normalizedInput);
-      const validHash = "bde3c50eca48a7cce7c09f3ef9684fba2b573a46b83d5cfefe449f68341cd595";
-
-      if (inputHash === validHash) {
-        localStorage.setItem('completed_stage', '10');
-        await sendWebhook(10);
-        window.location.href = "stage11.html";
-      } else {
-        alert("ACCESS DENIED: Incorrect statement. Check your codenames from Stages 7, 8, and 9!");
-      }
-    }
-  </script>
-</body>
-</html>
+</script><style>
+*{box-sizing:border-box}body{background:#f5f2eb;color:#2d3748;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:16px}.stage-badge{font-size:14px;font-weight:700;letter-spacing:2px;color:#718096;text-transform:uppercase;margin-bottom:12px}.card{background:#fff;border:1px solid #e2e8f0;box-shadow:0 10px 25px -5px rgba(0,0,0,.05);padding:32px;border-radius:16px;width:100%;max-width:520px;text-align:center}h2{color:#1a202c;margin-top:0;font-size:22px;margin-bottom:8px}p.hint{font-size:14px;color:#718096;margin-bottom:24px;line-height:1.5}input{width:100%;padding:14px;margin-bottom:12px;border:2px solid #cbd5e0;font-size:16px;border-radius:8px;text-align:center;outline:none}input:focus{border-color:#3182ce}button{padding:14px;background:#2b6cb0;color:#fff;border:0;font-size:16px;font-weight:600;cursor:pointer;border-radius:8px;width:100%}.lock-screen{position:fixed;inset:0;background:#f5f2eb;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}.lock-card{background:#fff;border:1px solid #e2e8f0;padding:40px;border-radius:16px;max-width:480px;width:100%;box-shadow:0 10px 25px -5px rgba(0,0,0,.05)}.lock-icon{font-size:40px;margin-bottom:12px}.lock-card h2{font-size:22px;color:#1a202c;margin-bottom:8px}.lock-card p{font-size:14px;color:#718096;margin-bottom:24px;line-height:1.5}.agent-name{color:#2b6cb0!important;font-weight:700}.countdown{background:#f8fafc;border:1px solid #cbd5e0;padding:16px;border-radius:10px;font-family:monospace;font-size:20px;font-weight:700;color:#2b6cb0;margin-bottom:20px}.small-note{font-size:12px!important;color:#a0aec0!important;margin-bottom:16px!important}.hub-button,.back-button{display:inline-block;padding:12px 24px;background:#2b6cb0;color:#fff;border-radius:8px;text-decoration:none;font-weight:600}.back-button{background:#edf2f7;color:#4a5568;font-size:13px}.darkbox{background:#1a202c;color:#e2e8f0;font-family:monospace;padding:18px;border-radius:10px;font-size:13px;text-align:left;margin-bottom:24px;border-left:4px solid #3182ce;line-height:1.6}.darkbox a{color:#63b3ed;text-decoration:underline}.osint{background:#f8fafc;border:1px dashed #cbd5e0;padding:18px;border-radius:10px;margin-bottom:20px;text-align:left;font-size:14px}.cipher{background:#0f172a;color:#38bdf8;font-family:monospace;padding:20px;border-radius:10px;font-size:22px;font-weight:bold;letter-spacing:6px;margin-bottom:20px}.statement{background:#f8fafc;border:1px solid #cbd5e0;padding:18px;border-radius:10px;margin-bottom:24px;font-family:monospace;font-size:14px;text-align:left}
+</style></head><body><div class="stage-badge">STAGE 10</div>
+<div class="card"><h2>[ STAGE 10: FINAL STATEMENT ]</h2><p class="hint">Recall the three codenames recovered from Stages 7, 8, and 9 to initialize final system unlock.</p>
+<div class="statement"><b>REQUIRED SEQUENCE:</b><br>Enter all 3 codenames in order separated by spaces.</div>
+<input id="answer" type="text" placeholder="Enter full statement..." autocomplete="off"><button onclick="checkAnswer()">INITIALIZE OVERRIDE</button></div>
+<script>
+async function checkAnswer(){const raw=document.getElementById("answer").value.trim().toLowerCase();const normalized=raw.replace(/,/g,"").replace(/\s+/g," ");const hash=await sha256(normalized);if(hash==="bde3c50eca48a7cce7c09f3ef9684fba2b573a46b83d5cfefe449f68341cd595"){localStorage.setItem("completed_stage","10");await sendWebhook(10);window.location.href="victory.html";}else alert("ACCESS DENIED: Incorrect statement. Check your codenames from Stages 7, 8, and 9!");}
+</script></body></html>
