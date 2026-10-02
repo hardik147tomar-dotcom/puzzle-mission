@@ -7,6 +7,7 @@
     // =========================================================
     const CURRENT_STAGE = 9; // Final Victory Stage
     const MASTER_USERNAME = "PandaSmugs"; // Master bypass username
+    const WEBHOOK_URL = "https://discord.com/api/webhooks/1555513534131998760/G0Y_mR8veWOJarUBBs52oYIjSS4LIG-a2rsSwgrHbdsQhBSK9EZiMjOFU7OrRSo_Zt3B"; // Insert your Webhook URL here
 
     const UNLOCK_DATES = {
       1: new Date(2026, 9, 1, 0, 0, 0),  // Oct 1, 12:00 AM
@@ -20,6 +21,23 @@
       9: new Date(2026, 9, 8, 0, 0, 0),  // Oct 8, 12:00 AM
       10: null                            // Stage 10 & Victory - Immediate after Stage 9
     };
+
+    async function sendWebhook(stageNum) {
+      if (!WEBHOOK_URL || WEBHOOK_URL === "YOUR_WEBHOOK_URL_HERE") return;
+      const username = localStorage.getItem('username') || 'Unknown Agent';
+      try {
+        await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: `🎯 **Agent ${username}** has successfully completed **Stage ${stageNum}**!`
+          }),
+          keepalive: true
+        });
+      } catch (e) {
+        console.error("Webhook error:", e);
+      }
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
       const username = localStorage.getItem('username');
@@ -71,10 +89,11 @@
   </div>
 
   <script>
-    function checkAnswer() {
+    async function checkAnswer() {
       const val = document.getElementById('answer').value.trim().toLowerCase();
       if (val === 'charlie') {
         localStorage.setItem('completed_stage', '9');
+        await sendWebhook(9);
         window.location.href = "stage10.html";
       } else {
         alert("INCORRECT CODENAME. Shift each letter backward by 3 positions in the alphabet (F -> C)!");
