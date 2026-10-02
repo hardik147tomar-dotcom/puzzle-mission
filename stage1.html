@@ -7,7 +7,7 @@
     // =========================================================
     const CURRENT_STAGE = 1; 
     const MASTER_USERNAME = "PandaSmugs"; 
-    const STAGE_WEBHOOK_URL = "https://discord.com/api/webhooks/1555513534131998760/G0Y_mR8veWOJarUBBs52oYIjSS4LIG-a2rsSwgrHbdsQhBSK9EZiMjOFU7OrRSo_Zt3B"; // Put your stage webhook URL here
+    const STAGE_WEBHOOK_URL = "https://discord.com/api/webhooks/1555513534131998760/G0Y_mR8veWOJarUBBs52oYIjSS4LIG-a2rsSwgrHbdsQhBSK9EZiMjOFU7OrRSo_Zt3B";
 
     const UNLOCK_DATES = {
       1: new Date(2026, 9, 1, 0, 0, 0),  // Oct 1, 12:00 AM
@@ -164,14 +164,25 @@
   </div>
 
   <script>
+    async function sha256(str) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
     async function checkAnswer() {
       const val = document.getElementById('answer').value.trim().toLowerCase();
-      const validAnswers = ['fire', 'a fire', 'the fire'];
+      const hashedInput = await sha256(val);
       
-      if (validAnswers.includes(val)) {
+      const validHashes = [
+        "2b1a13e51f472ebf4a622415177ccb082696e5fa1fa58be9f3590c9ef49a37a7", // fire
+        "2215c3e7ef9281e59178ef7a15124b8979c1bc7a876a3f4e2f8fa7bfeb16616b", // a fire
+        "8d116345ee3b7f14b62e49c7f212217f7d753909bd4b73b52d218d6411dd7855"  // the fire
+      ];
+      
+      if (validHashes.includes(hashedInput)) {
         await notifyStageComplete(1, "stage2.html");
       } else {
-        alert("INCORRECT KEY. Translate the Morse code banner on top for a hint.");
+        alert("INCORRECT ANSWER.");
       }
     }
   </script>
