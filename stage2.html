@@ -7,7 +7,7 @@
   // =========================================================
   const CURRENT_STAGE = 2; 
   const MASTER_USERNAME = "PandaSmugs"; 
-  const STAGE_WEBHOOK_URL = "https://discord.com/api/webhooks/1555513534131998760/G0Y_mR8veWOJarUBBs52oYIjSS4LIG-a2rsSwgrHbdsQhBSK9EZiMjOFU7OrRSo_Zt3B"; // Put your stage webhook URL here
+  const STAGE_WEBHOOK_URL = "https://discord.com/api/webhooks/1555513534131998760/G0Y_mR8veWOJarUBBs52oYIjSS4LIG-a2rsSwgrHbdsQhBSK9EZiMjOFU7OrRSo_Zt3B";
 
   const UNLOCK_DATES = {
     1: new Date(2026, 9, 1, 0, 0, 0),  // Oct 1, 12:00 AM
@@ -170,22 +170,35 @@
   </div>
 
   <script>
+    async function sha256(str) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
     async function checkStage2() {
       const email = document.getElementById('email').value.trim().toLowerCase();
       const location = document.getElementById('location').value.trim().toLowerCase();
       const twitter = document.getElementById('twitter').value.trim().toLowerCase();
 
-      const validEmail = "hardik147tomar@gmail.com";
-      const validLocation = "frankfurt";
-      const validTwitter = [
-        "i'm no brain guy", "im no brain guy", "imnobrainguy",
-        "@i'm no brain guy", "@im no brain guy", "@imnobrainguy"
+      const emailHash = await sha256(email);
+      const locationHash = await sha256(location);
+      const twitterHash = await sha256(twitter);
+
+      const validEmailHash = "1d858ef9c7db4b15d91e604f55a15320d77f374714dbf5567b5e4c6c06ca46f2";
+      const validLocationHash = "d365fef5ef19dbbf11fa24df81f7d540306ee1b1c34a26f030ef1d1022f4625b";
+      const validTwitterHashes = [
+        "769e3768fbccbd22ddbc54fb4a20b2d354a8564bf2170bfeb848525b6a713835",
+        "5ca2a222ef2f0672ef9e34aedef9ddaa214f4c2df2d1594916a4f2277d3aa050",
+        "4fbc40d2d3a3390234a9b6c08bcbf51194e41b9c1aa2b005e83ecf02f0e08f23",
+        "5cfc2c8f8fb44146522c06121404edbd238a22ec2058b8f2d572dbb4ba9e5ec4",
+        "8a1ee9e1cdd1dbf6b48529f8f4a1fa6b67e7a7cf4984f8ee75b63750a98f1aa1",
+        "f3a61c5dd10ed4ec9d921356f9eb8e1ee54005d5e219fb096d22ef1db84394e1"
       ];
 
-      if (email === validEmail && location === validLocation && validTwitter.includes(twitter)) {
+      if (emailHash === validEmailHash && locationHash === validLocationHash && validTwitterHashes.includes(twitterHash)) {
         await notifyStageComplete(2, "stage3.html");
       } else {
-        alert("ONE OR MORE FIELDS ARE INCORRECT. Re-check all 3 entries.");
+        alert("INCORRECT ANSWER.");
       }
     }
   </script>
