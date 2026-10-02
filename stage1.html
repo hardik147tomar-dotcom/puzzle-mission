@@ -162,34 +162,32 @@
       <button onclick="checkAnswer()">SUBMIT KEY</button>
     </div>
   </div>
+  <script>
 
- <script>
-  async function sha256(str) {
-    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+async function checkAnswer() {
+  const rawInput = document.getElementById('answer').value;
+  
+  // Converts to lowercase AND strips all spaces/special characters completely
+  const cleanedInput = rawInput.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const hashedInput = await sha256(cleanedInput);
+
+  // Now you ONLY need hashes for the cleaned words:
+  // "fire" -> 36bbe50ed96841d10443bcb670d6554f0a34b761be67ec9c4a8ad2c0c44ca42c
+  // "thefire" -> edf839a3f253372fef093a3c20050ee63fa0609315d18df4119bd74e30018b32
+  // "afire" -> a5d070b4fbf3564e525a7a726f1c48003463300fb25a17688194411d35a5a1f2
+
+  const validHashes = [
+    "36bbe50ed96841d10443bcb670d6554f0a34b761be67ec9c4a8ad2c0c44ca42c", // "fire"
+    "edf839a3f253372fef093a3c20050ee63fa0609315d18df4119bd74e30018b32", // "thefire"
+    "a5d070b4fbf3564e525a7a726f1c48003463300fb25a17688194411d35a5a1f2"  // "afire"
+  ];
+
+  if (validHashes.includes(hashedInput)) {
+    await notifyStageComplete(1, "stage2.html");
+  } else {
+    alert("INCORRECT ANSWER.");
   }
-
-  async function checkAnswer() {
-    const val = document.getElementById('answer').value.trim().toLowerCase();
-    const hashedInput = await sha256(val);
-    
-    // Debug output: Press F12 -> Console to see your input hash
-    console.log("User Input:", val);
-    console.log("Generated SHA-256 Hash:", hashedInput);
-
-    const validHashes = [
-      "36bbe50ed96841d10443bcb670d6554f0a34b761be67ec9c4a8ad2c0c44ca42c", // "fire"
-      "090886c99c5a17a78eb512b93d3b76ed5a2a2c1f0340b154ef98e9be2d721107", // "the fire"
-      "d399990b793fae5ddedff71810b42f6fb39f60b4fb9b4ddbc6d43e1cfcf0d7d8"  // "a fire"
-    ];
-
-    if (validHashes.includes(hashedInput)) {
-      await notifyStageComplete(1, "stage2.html");
-    } else {
-      alert("INCORRECT ANSWER.");
-    }
-  }
-</script>
-
+}
+  </script>
 </body>
 </html>
