@@ -163,29 +163,30 @@
     </div>
   </div>
 
-  <script>
-    async function sha256(str) {
-      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
-    }
+ <script>
+  async function sha256(str) {
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+  }
 
-    async function checkAnswer() {
-      const val = document.getElementById('answer').value.trim().toLowerCase();
-      const hashedInput = await sha256(val);
-      
-      const validHashes = [
-        "2b1a13e51f472ebf4a622415177ccb082696e5fa1fa58be9f3590c9ef49a37a7", // fire
-        "2215c3e7ef9281e59178ef7a15124b8979c1bc7a876a3f4e2f8fa7bfeb16616b", // a fire
-        "8d116345ee3b7f14b62e49c7f212217f7d753909bd4b73b52d218d6411dd7855"  // the fire
-      ];
-      
-      if (validHashes.includes(hashedInput)) {
-        await notifyStageComplete(1, "stage2.html");
-      } else {
-        alert("INCORRECT ANSWER.");
-      }
+  async function checkAnswer() {
+    const val = document.getElementById('answer').value.trim().toLowerCase();
+    const hashedInput = await sha256(val);
+    
+    // Verified SHA-256 hashes for: "fire", "the fire", and "a fire"
+    const validHashes = [
+      "36bbe50ed96841d10443bcb670d6554f0a34b761be67ec9c4a8ad2c0c44ca42c", 
+      "090886c99c5a17a78eb512b93d3b76ed5a2a2c1f0340b154ef98e9be2d721107", 
+      "d399990b793fae5ddedff71810b42f6fb39f60b4fb9b4ddbc6d43e1cfcf0d7d8" 
+    ];
+    
+    if (validHashes.includes(hashedInput)) {
+      await notifyStageComplete(1, "stage2.html");
+    } else {
+      alert("INCORRECT ANSWER.");
     }
-  </script>
+  }
+</script>
 
 </body>
 </html>
