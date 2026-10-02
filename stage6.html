@@ -2,115 +2,53 @@
 <html lang="en">
 <head>
   <script>
-  const CURRENT_STAGE = 6; 
-  const MASTER_USERNAME = "PandaSmugs";
-  const WEBHOOK_URL = "https://discord.com/api/webhooks/1555513534131998760/G0Y_mR8veWOJarUBBs52oYIjSS4LIG-a2rsSwgrHbdsQhBSK9EZiMjOFU7OrRSo_Zt3B"; // Insert your Webhook URL here
+    const CURRENT_STAGE = 6; 
+    const MASTER_USERNAME = "PandaSmugs";
+    const WEBHOOK_URL = "https://discord.com/api/webhooks/1555513534131998760/G0Y_mR8veWOJarUBBs52oYIjSS4LIG-a2rsSwgrHbdsQhBSK9EZiMjOFU7OrRSo_Zt3B";
 
-  const UNLOCK_DATES = {
-    1: new Date(2026, 9, 1, 0, 0, 0),
-    2: new Date(2026, 9, 2, 0, 0, 0),
-    3: new Date(2026, 9, 3, 0, 0, 0),
-    4: null,                            
-    5: new Date(2026, 9, 4, 0, 0, 0),
-    6: new Date(2026, 9, 5, 0, 0, 0),
-    7: null                             
-  };
+    const UNLOCK_DATES = {
+      1: new Date(2026, 9, 1, 0, 0, 0),
+      2: new Date(2026, 9, 2, 0, 0, 0),
+      3: new Date(2026, 9, 3, 0, 0, 0),
+      4: null,                            
+      5: new Date(2026, 9, 4, 0, 0, 0),
+      6: new Date(2026, 9, 5, 0, 0, 0),
+      7: new Date(2026, 9, 6, 0, 0, 0),
+      8: new Date(2026, 9, 7, 0, 0, 0),
+      9: new Date(2026, 9, 8, 0, 0, 0),
+      10: null                             
+    };
 
-  async function sendWebhook(stageNum) {
-    if (!WEBHOOK_URL || WEBHOOK_URL === "YOUR_WEBHOOK_URL_HERE") return;
-    const username = localStorage.getItem('username') || 'Unknown Agent';
-    try {
-      await fetch(WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content: `🎯 **Agent ${username}** has successfully completed **Stage ${stageNum}**!`
-        }),
-        keepalive: true
-      });
-    } catch (e) {
-      console.error("Webhook error:", e);
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    const username = localStorage.getItem('username');
-    const completedStage = parseInt(localStorage.getItem('completed_stage') || '0');
-    const requiredPreviousStage = CURRENT_STAGE - 1;
-
-    if (!username) {
-      window.location.href = "index.html";
-      return;
-    }
-
-    const isMasterUser = username.trim().toLowerCase() === MASTER_USERNAME.toLowerCase();
-
-    if (!isMasterUser && completedStage < requiredPreviousStage) {
-      showLockOverlay(`Stage ${requiredPreviousStage} Required`, `Agent ${username}, you must complete Stage ${requiredPreviousStage} before accessing Stage 6.`);
-      return;
-    }
-
-    const targetDate = UNLOCK_DATES[CURRENT_STAGE];
-    const now = new Date();
-
-    if (!isMasterUser && targetDate && now < targetDate) {
-      renderCountdownOverlay(targetDate, username);
-    }
-  });
-
-  function renderCountdownOverlay(targetDate, username) {
-    const formattedDate = targetDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-
-    const lockHTML = `
-      <div id="timeLockScreen" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#f5f2eb; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
-        <div style="background:#ffffff; border:1px solid #e2e8f0; padding:40px; border-radius:16px; max-width:480px; width:100%; box-shadow:0 10px 25px -5px rgba(0,0,0,0.05);">
-          <div style="font-size:40px; margin-bottom:12px;">🔒</div>
-          <h2 style="font-size:22px; color:#1a202c; margin-bottom:4px;">STAGE 6 LOCKED</h2>
-          <p style="font-size:13px; color:#2b6cb0; font-weight:700; margin-bottom:12px;">AGENT: ${username}</p>
-          <p style="font-size:14px; color:#718096; margin-bottom:20px;">This stage will unlock on <strong>${formattedDate}</strong>.</p>
-          
-          <div id="timerCountdown" style="background:#f8fafc; border:1px solid #cbd5e0; padding:16px; border-radius:10px; font-family:monospace; font-size:20px; font-weight:700; color:#2b6cb0; margin-bottom:20px;">
-            00d 00h 00m 00s
-          </div>
-
-          <p style="font-size:12px; color:#a0aec0; margin-bottom:16px;">Your username and progress are saved. You can close this page and return later.</p>
-          <a href="index.html" style="display:inline-block; padding:10px 20px; background:#edf2f7; color:#4a5568; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">BACK TO HUB</a>
-        </div>
-      </div>
-    `;
-
-    document.body.insertAdjacentHTML('beforeend', lockHTML);
-
-    const interval = setInterval(() => {
-      const remaining = targetDate - new Date();
-      if (remaining <= 0) {
-        clearInterval(interval);
-        const lockEl = document.getElementById('timeLockScreen');
-        if (lockEl) lockEl.remove();
-      } else {
-        const d = Math.floor(remaining / (1000 * 60 * 60 * 24));
-        const h = Math.floor((remaining / (1000 * 60 * 60)) % 24);
-        const m = Math.floor((remaining / 1000 / 60) % 60);
-        const s = Math.floor((remaining / 1000) % 60);
-        const timerEl = document.getElementById('timerCountdown');
-        if (timerEl) timerEl.innerText = `${d}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+    async function sendWebhook(stageNum) {
+      if (!WEBHOOK_URL || WEBHOOK_URL === "YOUR_WEBHOOK_URL_HERE") return;
+      const username = localStorage.getItem('username') || 'Unknown Agent';
+      try {
+        await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: `🎯 **Agent ${username}** has successfully completed **Stage ${stageNum}**!`
+          }),
+          keepalive: true
+        });
+      } catch (e) {
+        console.error("Webhook error:", e);
       }
-    }, 1000);
-  }
+    }
 
-  function showLockOverlay(title, description) {
-    const lockHTML = `
-      <div style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#f5f2eb; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
-        <div style="background:#ffffff; border:1px solid #e2e8f0; padding:40px; border-radius:16px; max-width:480px; width:100%; box-shadow:0 10px 25px -5px rgba(0,0,0,0.05);">
-          <div style="font-size:40px; margin-bottom:12px;">🛑</div>
-          <h2 style="font-size:22px; color:#1a202c; margin-bottom:8px;">${title}</h2>
-          <p style="font-size:14px; color:#718096; margin-bottom:24px;">${description}</p>
-          <a href="index.html" style="display:inline-block; padding:12px 24px; background:#2b6cb0; color:white; border-radius:8px; text-weight:600;">RETURN TO HUB</a>
-        </div>
-      </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', lockHTML);
-  }
+    document.addEventListener("DOMContentLoaded", () => {
+      const username = localStorage.getItem('username');
+      const completedStage = parseInt(localStorage.getItem('completed_stage') || '0');
+      const requiredPreviousStage = CURRENT_STAGE - 1;
+
+      if (!username) { window.location.href = "index.html"; return; }
+      const isMasterUser = username.trim().toLowerCase() === MASTER_USERNAME.toLowerCase();
+
+      if (!isMasterUser && completedStage < requiredPreviousStage) {
+        alert(`Agent ${username}, you must complete Stage ${requiredPreviousStage} first.`);
+        window.location.href = "index.html";
+      }
+    });
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -143,7 +81,7 @@
 
   <div class="card">
     <h2>DRAW THE AGENCY EMBLEM</h2>
-    <p class="instructions">Draw the target symbol anywhere inside the box below.</p>
+    <p class="instructions">Draw the double-arch symbol inside the canvas below.</p>
 
     <div class="canvas-container">
       <canvas id="refCanvas" width="300" height="300"></canvas>
@@ -166,7 +104,6 @@
 
     let isDrawing = false;
 
-    // Line styles matching stroke weight from your drawing
     drawCtx.lineWidth = 12;
     drawCtx.lineCap = 'round';
     drawCtx.lineJoin = 'round';
@@ -177,29 +114,17 @@
     refCtx.lineJoin = 'round';
     refCtx.strokeStyle = '#2b6cb0';
 
-    // Target Emblem Blueprint (Custom Double-Arch with Center Stem)
     function drawTargetEmblem(ctx) {
       ctx.clearRect(0, 0, 300, 300);
       ctx.beginPath();
-
-      // Central Vertical Stem
-      ctx.moveTo(150, 175);
-      ctx.lineTo(150, 115);
-
-      // Left Curved Arch
-      ctx.moveTo(98, 215);
-      ctx.bezierCurveTo(90, 138, 126, 128, 150, 175);
-
-      // Right Curved Arch
-      ctx.moveTo(150, 175);
-      ctx.bezierCurveTo(174, 128, 210, 138, 202, 215);
-
+      ctx.moveTo(150, 175); ctx.lineTo(150, 115);
+      ctx.moveTo(98, 215);  ctx.bezierCurveTo(90, 138, 126, 128, 150, 175);
+      ctx.moveTo(150, 175); ctx.bezierCurveTo(174, 128, 210, 138, 202, 215);
       ctx.stroke();
     }
 
     drawTargetEmblem(refCtx);
 
-    // Drawing Event Handlers
     function getPos(e) {
       const rect = drawCanvas.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -237,49 +162,40 @@
       document.getElementById('status').innerText = '';
     }
 
-    // Auto-Centering and Normalizing Canvas Generator
     function getNormalizedCanvas(sourceCanvas) {
       const ctx = sourceCanvas.getContext('2d');
       const imgData = ctx.getImageData(0, 0, 300, 300).data;
 
-      let minX = 300, maxX = 0, minY = 300, maxY = 0;
-      let totalPixels = 0;
+      let minX = 300, maxX = 0, minY = 300, maxY = 0, totalPixels = 0;
 
       for (let y = 0; y < 300; y++) {
         for (let x = 0; x < 300; x++) {
           const alpha = imgData[(y * 300 + x) * 4 + 3];
           if (alpha > 50) {
-            if (x < minX) minX = x;
-            if (x > maxX) maxX = x;
-            if (y < minY) minY = y;
-            if (y > maxY) maxY = y;
+            if (x < minX) minX = x; if (x > maxX) maxX = x;
+            if (y < minY) minY = y; if (y > maxY) maxY = y;
             totalPixels++;
           }
         }
       }
 
-      if (totalPixels < 100) return null; // Minimum stroke check
+      if (totalPixels < 100) return null;
 
       const cropWidth = Math.max(maxX - minX + 1, 10);
       const cropHeight = Math.max(maxY - minY + 1, 10);
 
       const normCanvas = document.createElement('canvas');
-      normCanvas.width = 300;
-      normCanvas.height = 300;
+      normCanvas.width = 300; normCanvas.height = 300;
       const normCtx = normCanvas.getContext('2d');
 
-      const targetSize = 180;
-      const scale = Math.min(targetSize / cropWidth, targetSize / cropHeight);
-
+      const scale = Math.min(180 / cropWidth, 180 / cropHeight);
       const destWidth = cropWidth * scale;
       const destHeight = cropHeight * scale;
-      const destX = (300 - destWidth) / 2;
-      const destY = (300 - destHeight) / 2;
 
       normCtx.drawImage(
         sourceCanvas, 
         minX, minY, cropWidth, cropHeight, 
-        destX, destY, destWidth, destHeight
+        (300 - destWidth) / 2, (300 - destHeight) / 2, destWidth, destHeight
       );
 
       return normCanvas;
@@ -287,17 +203,15 @@
 
     async function verifyDrawing() {
       const status = document.getElementById('status');
-
       const userNormCanvas = getNormalizedCanvas(drawCanvas);
 
       if (!userNormCanvas) {
         status.style.color = "#e53e3e";
-        status.innerText = "REJECTED: Drawing is too sparse or empty. Draw the full emblem!";
+        status.innerText = "REJECTED: Drawing is empty or incomplete!";
         return;
       }
 
       const refNormCanvas = getNormalizedCanvas(refCanvas);
-
       const GRID_SIZE = 32;
       const CELL_SIZE = 300 / GRID_SIZE;
 
@@ -317,28 +231,21 @@
         }
       }
 
-      let intersection = 0;
-      let union = 0;
-
+      let intersection = 0, union = 0;
       for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
         if (userGrid[i] && refGrid[i]) intersection++;
         if (userGrid[i] || refGrid[i]) union++;
       }
 
       const matchScore = Math.round((intersection / union) * 100);
-      const PASS_THRESHOLD = 40; // Flexible 40%+ threshold for freehand curves
+      const PASS_THRESHOLD = 40;
 
       if (matchScore >= PASS_THRESHOLD) {
         status.style.color = "#38a169";
         status.innerText = `VERIFIED! Match Score: ${matchScore}%`;
-
         localStorage.setItem('completed_stage', '6');
-        sendWebhook(6);
-
-        setTimeout(() => {
-          localStorage.setItem('completed_stage', '6'); // Replace X with that file's stage number
-          window.location.href = "stage7.html";
-        }, 1200);
+        await sendWebhook(6);
+        setTimeout(() => { window.location.href = "stage7.html"; }, 1200);
       } else {
         status.style.color = "#e53e3e";
         status.innerText = `REJECTED: Match Score ${matchScore}%. (Requires ${PASS_THRESHOLD}%+)`;
