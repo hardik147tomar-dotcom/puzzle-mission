@@ -2,21 +2,24 @@
 <html lang="en">
 <head>
   <script>
-    const CURRENT_STAGE = 10;
-    const MASTER_USERNAME = "PandaSmugs";
-    const WEBHOOK_URL = "https://discord.com/api/webhooks/1555513534131998760/G0Y_mR8veWOJarUBBs52oYIjSS4LIG-a2rsSwgrHbdsQhBSK9EZiMjOFU7OrRSo_Zt3B";
+     // =========================================================
+    // CONFIGURATION FOR THIS FILE
+    // =========================================================
+    const CURRENT_STAGE = 10; // Final Victory Stage
+    const MASTER_USERNAME = "PandaSmugs"; // Master bypass username
+    const WEBHOOK_URL = "https://discord.com/api/webhooks/1555513534131998760/G0Y_mR8veWOJarUBBs52oYIjSS4LIG-a2rsSwgrHbdsQhBSK9EZiMjOFU7OrRSo_Zt3B"; // Insert your Webhook URL here
 
     const UNLOCK_DATES = {
-      1: new Date(2026, 9, 1, 0, 0, 0),
-      2: new Date(2026, 9, 2, 0, 0, 0),
-      3: new Date(2026, 9, 3, 0, 0, 0),
-      4: null,
-      5: new Date(2026, 9, 4, 0, 0, 0),
-      6: new Date(2026, 9, 5, 0, 0, 0),
-      7: new Date(2026, 9, 6, 0, 0, 0),
-      8: new Date(2026, 9, 7, 0, 0, 0),
-      9: new Date(2026, 9, 8, 0, 0, 0),
-      10: null
+      1: new Date(2026, 9, 1, 0, 0, 0),  // Oct 1, 12:00 AM
+      2: new Date(2026, 9, 2, 0, 0, 0),  // Oct 2, 12:00 AM
+      3: new Date(2026, 9, 3, 0, 0, 0),  // Oct 3, 12:00 AM
+      4: null,                            // Stage 4 (scan.html) - Immediate after Stage 3
+      5: new Date(2026, 9, 4, 0, 0, 0),  // Oct 4, 12:00 AM
+      6: new Date(2026, 9, 5, 0, 0, 0),  // Oct 5, 12:00 AM
+      7: new Date(2026, 9, 6, 0, 0, 0),  // Oct 6, 12:00 AM
+      8: new Date(2026, 9, 7, 0, 0, 0),  // Oct 7, 12:00 AM
+      9: new Date(2026, 9, 8, 0, 0, 0),  // Oct 8, 12:00 AM
+      10: null                            // Stage 10 & Victory - Immediate after Stage 9
     };
 
     async function sendWebhook(stageNum) {
@@ -36,17 +39,17 @@
       }
     }
 
-    async function sha256(str) {
-      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-
     document.addEventListener("DOMContentLoaded", () => {
       const username = localStorage.getItem('username');
       const completedStage = parseInt(localStorage.getItem('completed_stage') || '0');
 
-      if (!username) { window.location.href = "index.html"; return; }
+      if (!username) {
+        window.location.href = "index.html";
+        return;
+      }
+
       const isMasterUser = username.trim().toLowerCase() === MASTER_USERNAME.toLowerCase();
+
       if (!isMasterUser && completedStage < (CURRENT_STAGE - 1)) {
         alert(`Agent ${username}, you must complete Stage ${CURRENT_STAGE - 1} first.`);
         window.location.href = "index.html";
@@ -90,11 +93,10 @@
   <script>
     async function checkAnswer() {
       const rawInput = document.getElementById('answer').value.trim().toLowerCase();
+      // Clean commas or multiple spaces
       const normalizedInput = rawInput.replace(/,/g, '').replace(/\s+/g, ' ');
-      const hashed = await sha256(normalizedInput);
 
-      // SHA-256 Hash of "alpha bravo charlie"
-      if (hashed === "4a49dbd8c903a3d5e2e4e138379430c25a0a4c0a514d232a58b88939c369bb9a") {
+      if (normalizedInput === "alpha bravo charlie") {
         localStorage.setItem('completed_stage', '10');
         await sendWebhook(10);
         window.location.href = "victory.html";
