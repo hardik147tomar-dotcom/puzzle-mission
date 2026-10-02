@@ -41,19 +41,27 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       const username = localStorage.getItem('username');
-      const completedStage = parseInt(localStorage.getItem('completed_stage') || '0');
+const completedStage = parseInt(
+  localStorage.getItem('completed_stage') || '0'
+);
 
-      if (!username) {
-        window.location.href = "index.html";
-        return;
-      }
+const requiredPreviousStage = CURRENT_STAGE - 1;
 
-      const isMasterUser = username.trim().toLowerCase() === MASTER_USERNAME.toLowerCase();
+if (!username) {
+  window.location.href = "index.html";
+  return;
+}
 
-      if (!isMasterUser && completedStage < (CURRENT_STAGE - 1)) {
-        alert(`Agent ${username}, you must complete Stage ${CURRENT_STAGE - 1} first.`);
-        window.location.href = "index.html";
-      }
+const isMasterUser =
+  username.trim().toLowerCase() === MASTER_USERNAME.toLowerCase();
+
+if (!isMasterUser && completedStage < requiredPreviousStage) {
+  showLockOverlay(
+    `Stage ${requiredPreviousStage} Required`,
+    `Agent ${username}, you must complete Stage ${requiredPreviousStage} before accessing this stage.`
+  );
+  return;
+}
     });
   </script>
   <meta charset="UTF-8">
