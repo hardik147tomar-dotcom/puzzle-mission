@@ -35,8 +35,8 @@
       const isMasterUser = username.trim().toLowerCase() === MASTER_USERNAME.toLowerCase();
 
       // 2. Check Prerequisite Progress (Requires completing Stage 10)
-      if (!isMasterUser && completedStage < 10) {
-        showLockOverlay(`Stage 10 Required`, `Agent ${username}, you must complete Stage 10 before accessing the Victory page.`);
+      if (!isMasterUser && completedStage < 6) {
+        showLockOverlay(`Stage 6 Required`, `Agent ${username}, you must complete Stage 6 before accessing the Victory page.`);
         return;
       }
 
