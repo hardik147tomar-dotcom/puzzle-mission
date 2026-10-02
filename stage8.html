@@ -91,17 +91,27 @@
   </div>
 
   <script>
-    async function checkAnswer() {
-      const val = document.getElementById('answer').value.trim().toLowerCase();
-      const validAnswers = ['c418', 'daniel', 'daniel rosenfeld'];
+        async function sha256(str) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
 
-      if (validAnswers.includes(val)) {
+async function checkAnswer() {
+      const val = document.getElementById('answer').value.trim().toLowerCase();
+      const inputHash = await sha256(val);
+      const validHashes = [
+        "671dc60a3a2f1548a946f7288898fae6b359b57df1ca066c4232c3e8085373a6",
+        "bd3dae5fb91f88a4f0978222dfd58f59a124257cb081486387cbae9df11fb879",
+        "9cde692a2dca810684b5b0d7a5c8153519acc1788fa3add240eba9d102b057fc"
+      ];
+
+      if (validHashes.includes(inputHash)) {
         localStorage.setItem('completed_stage', '8');
         await sendWebhook(8);
-        alert("CORRECT! Codename revealed: BRAVO");
+        alert("CORRECT! Stage 8 complete.");
         window.location.href = "stage9.html";
       } else {
-        alert("INCORRECT COMPOSER. Hint: Think of C418 or his real first name!");
+        alert("INCORRECT COMPOSER. Re-check the public reference.");
       }
     }
   </script>

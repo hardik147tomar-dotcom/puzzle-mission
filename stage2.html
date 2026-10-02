@@ -7,7 +7,7 @@
   // =========================================================
   const CURRENT_STAGE = 2; 
   const MASTER_USERNAME = "PandaSmugs"; 
-  const STAGE_WEBHOOK_URL = "https://discord.com/api/webhooks/1555513534131998760/G0Y_mR8veWOJarUBBs52oYIjSS4LIG-a2rsSwgrHbdsQhBSK9EZiMjOFU7OrRSo_Zt3B";
+  const STAGE_WEBHOOK_URL = "https://discord.com/api/webhooks/1555513534131998760/G0Y_mR8veWOJarUBBs52oYIjSS4LIG-a2rsSwgrHbdsQhBSK9EZiMjOFU7OrRSo_Zt3B"; // Put your stage webhook URL here
 
   const UNLOCK_DATES = {
     1: new Date(2026, 9, 1, 0, 0, 0),  // Oct 1, 12:00 AM
@@ -101,7 +101,7 @@
         const m = Math.floor((remaining / 1000 / 60) % 60);
         const s = Math.floor((remaining / 1000) % 60);
         const timerEl = document.getElementById('timerCountdown');
-        if (timerEl) timerEl.innerText = `${d}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}s ${String(s).padStart(2,'0')}s`;
+        if (timerEl) timerEl.innerText = `${d}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
       }
     }, 1000);
   }
@@ -170,12 +170,12 @@
   </div>
 
   <script>
-    async function sha256(str) {
+        async function sha256(str) {
       const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
       return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
     }
 
-    async function checkStage2() {
+async function checkStage2() {
       const email = document.getElementById('email').value.trim().toLowerCase();
       const location = document.getElementById('location').value.trim().toLowerCase();
       const twitter = document.getElementById('twitter').value.trim().toLowerCase();
@@ -187,29 +187,18 @@
       const validEmailHash = "1ddfd768875825b927ff4247cbdd6cca58855cfeea0bddaabade092169aea57c";
       const validLocationHash = "b392acdcfd33f02009db6c858da8a10be0b21080fdca65fcc56dda798cb85c2a";
       const validTwitterHashes = [
-        "628f9e893e9fa44f58f5c73852c267e22e30921246457908bce92c7cd337dc9d",
-        "4e7cdda41e5b230ad7831e671d81d1b45f618f1b4bff68dac19e5bf824a00c4f",
-        "23ae09c73892b9f59e948be49293ff3ed38bd8df4b84b4d9bb9c94326c9f1e3e",
         "0f05b3fb1e78ee00d2c1c3ff715d10abe2d3c440cf2385d6adcde1180342444a",
+        "23ae09c73892b9f59e948be49293ff3ed38bd8df4b84b4d9bb9c94326c9f1e3e",
+        "628f9e893e9fa44f58f5c73852c267e22e30921246457908bce92c7cd337dc9d",
         "fbc634cc9bb8967a3b861aab8afa9603c8634f143070f49e0089472901616566",
-        "b3accd217a01d9339be46dadc2c609708d8890c21e4d7729e2c6db46ac1a48b1"
+        "b3accd217a01d9339be46dadc2c609708d8890c21e4d7729e2c6db46ac1a48b1",
+        "4e7cdda41e5b230ad7831e671d81d1b45f618f1b4bff68dac19e5bf824a00c4f"
       ];
-
-      // Console logger for debugging
-      console.log(`[Email] "${email}" -> ${emailHash}`);
-      console.log(`[Location] "${location}" -> ${locationHash}`);
-      console.log(`[Twitter] "${twitter}" -> ${twitterHash}`);
 
       if (emailHash === validEmailHash && locationHash === validLocationHash && validTwitterHashes.includes(twitterHash)) {
         await notifyStageComplete(2, "stage3.html");
       } else {
-        alert(
-          `INCORRECT DETAILS ENTERED.\n\n` +
-          `--- GENERATED HASHES ---\n` +
-          `Email ("${email}"):\n${emailHash}\n\n` +
-          `Location ("${location}"):\n${locationHash}\n\n` +
-          `Twitter ("${twitter}"):\n${twitterHash}`
-        );
+        alert("ONE OR MORE FIELDS ARE INCORRECT. Re-check all 3 entries.");
       }
     }
   </script>

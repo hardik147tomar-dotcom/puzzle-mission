@@ -91,12 +91,18 @@
   </div>
 
   <script>
-    async function checkAnswer() {
-      const rawInput = document.getElementById('answer').value.trim().toLowerCase();
-      // Clean commas or multiple spaces
-      const normalizedInput = rawInput.replace(/,/g, '').replace(/\s+/g, ' ');
+        async function sha256(str) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
 
-      if (normalizedInput === "alpha bravo charlie") {
+async function checkAnswer() {
+      const rawInput = document.getElementById('answer').value.trim().toLowerCase();
+      const normalizedInput = rawInput.replace(/,/g, '').replace(/\s+/g, ' ');
+      const inputHash = await sha256(normalizedInput);
+      const validHash = "bde3c50eca48a7cce7c09f3ef9684fba2b573a46b83d5cfefe449f68341cd595";
+
+      if (inputHash === validHash) {
         localStorage.setItem('completed_stage', '10');
         await sendWebhook(10);
         window.location.href = "victory.html";

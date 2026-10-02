@@ -89,14 +89,22 @@
   </div>
 
   <script>
-    async function checkAnswer() {
+        async function sha256(str) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+async function checkAnswer() {
       const val = document.getElementById('answer').value.trim().toLowerCase();
-      if (val === 'charlie') {
+      const inputHash = await sha256(val);
+      const validHash = "b9dd960c1753459a78115d3cb845a57d924b6877e805b08bd01086ccdf34433c";
+
+      if (inputHash === validHash) {
         localStorage.setItem('completed_stage', '9');
         await sendWebhook(9);
         window.location.href = "stage10.html";
       } else {
-        alert("INCORRECT CODENAME. Shift each letter backward by 3 positions in the alphabet (F -> C)!");
+        alert("INCORRECT CODENAME. Shift each letter backward by 3 positions in the alphabet.");
       }
     }
   </script>

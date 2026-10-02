@@ -157,9 +157,17 @@
   </div>
 
   <script>
-    async function checkFinal() {
+        async function sha256(str) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+async function checkFinal() {
       const val = document.getElementById('password').value.trim().toLowerCase();
-      if (val === 'phantom') {
+      const inputHash = await sha256(val);
+      const validHash = "3bb68de60f56156655a2a70e606892edda3e2f2fc57b482bfe3ef1c5263db5b6";
+
+      if (inputHash === validHash) {
         await notifyStageComplete(5, "stage6.html");
       } else {
         alert("ACCESS DENIED: Incorrect password.");

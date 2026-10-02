@@ -100,9 +100,17 @@
   </div>
 
   <script>
-    async function checkAnswer() {
+        async function sha256(str) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+async function checkAnswer() {
       const val = document.getElementById('answer').value.trim().toLowerCase();
-      if (val === 'alpha') {
+      const inputHash = await sha256(val);
+      const validHash = "8ed3f6ad685b959ead7022518e1af76cd816f8e8ec7ccdda1ed4018e8f2223f8";
+
+      if (inputHash === validHash) {
         localStorage.setItem('completed_stage', '7');
         await sendWebhook(7);
         window.location.href = "stage8.html";
