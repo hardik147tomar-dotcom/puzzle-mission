@@ -2,272 +2,99 @@
 <html lang="en">
 <head>
   <script>
-  // =========================================================
-  // CONFIGURATION FOR THIS FILE
-  // =========================================================
-  const CURRENT_STAGE = 3; 
-  const MASTER_USERNAME = "PandaSmugs"; 
-  const STAGE_WEBHOOK_URL = "https://discord.com/api/webhooks/1555513534131998760/G0Y_mR8veWOJarUBBs52oYIjSS4LIG-a2rsSwgrHbdsQhBSK9EZiMjOFU7OrRSo_Zt3B"; // Put your stage webhook URL here
+    const CURRENT_STAGE = 3;
+    const MASTER_USERNAME = "PandaSmugs";
+    const WEBHOOK_URL = "https://discord.com/api/webhooks/1555513534131998760/G0Y_mR8veWOJarUBBs52oYIjSS4LIG-a2rsSwgrHbdsQhBSK9EZiMjOFU7OrRSo_Zt3B";
 
-  const UNLOCK_DATES = {
-    1: new Date(2026, 9, 1, 0, 0, 0),  // Oct 1, 12:00 AM
-    2: new Date(2026, 9, 2, 0, 0, 0),  // Oct 2, 12:00 AM
-    3: new Date(2026, 9, 3, 0, 0, 0),  // Oct 3, 12:00 AM
-    4: null,                            // Stage 4 (scan.html) - Immediate after Stage 3
-    5: new Date(2026, 9, 4, 0, 0, 0),  // Oct 4, 12:00 AM
-    6: new Date(2026, 9, 5, 0, 0, 0),  // Oct 5, 12:00 AM
-    7: null                             // Stage 7 & Victory - Immediate after Stage 6
-  };
+    const UNLOCK_DATES = {
+      1: new Date(2026, 9, 1, 0, 0, 0),
+      2: new Date(2026, 9, 2, 0, 0, 0),
+      3: new Date(2026, 9, 3, 0, 0, 0),
+      4: null,
+      5: new Date(2026, 9, 4, 0, 0, 0),
+      6: new Date(2026, 9, 5, 0, 0, 0),
+      7: new Date(2026, 9, 6, 0, 0, 0),
+      8: new Date(2026, 9, 7, 0, 0, 0),
+      9: new Date(2026, 9, 8, 0, 0, 0),
+      10: null
+    };
 
-  async function notifyStageComplete(stageNum, nextStageUrl) {
-    const username = localStorage.getItem('username') || 'An Agent';
-    localStorage.setItem('completed_stage', stageNum.toString());
-
-    if (STAGE_WEBHOOK_URL && STAGE_WEBHOOK_URL !== "YOUR_STAGE_WEBHOOK_URL_HERE") {
+    async function sendWebhook(stageNum) {
+      if (!WEBHOOK_URL || WEBHOOK_URL === "YOUR_WEBHOOK_URL_HERE") return;
+      const username = localStorage.getItem('username') || 'Unknown Agent';
       try {
-        await fetch(STAGE_WEBHOOK_URL, {
+        await fetch(WEBHOOK_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            content: `🎉 **${username}** has completed stage ${stageNum}!`
+            content: `🎯 **Agent ${username}** has successfully completed **Stage ${stageNum}**!`
           }),
           keepalive: true
         });
-      } catch (err) {
-        console.error("Webhook error:", err);
+      } catch (e) {
+        console.error("Webhook error:", e);
       }
     }
 
-    window.location.href = nextStageUrl;
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    const username = localStorage.getItem('username');
-    const completedStage = parseInt(localStorage.getItem('completed_stage') || '0');
-    const requiredPreviousStage = CURRENT_STAGE - 1;
-
-    if (!username) {
-      window.location.href = "index.html";
-      return;
+    async function sha256(str) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-    const isMasterUser = username.trim().toLowerCase() === MASTER_USERNAME.toLowerCase();
+    document.addEventListener("DOMContentLoaded", () => {
+      const username = localStorage.getItem('username');
+      const completedStage = parseInt(localStorage.getItem('completed_stage') || '0');
 
-    if (!isMasterUser && completedStage < requiredPreviousStage) {
-      showLockOverlay(`Stage ${requiredPreviousStage} Required`, `Agent ${username}, you must complete Stage ${requiredPreviousStage} before accessing this stage.`);
-      return;
-    }
-
-    const targetDate = UNLOCK_DATES[CURRENT_STAGE];
-    const now = new Date();
-
-    if (!isMasterUser && targetDate && now < targetDate) {
-      renderCountdownOverlay(targetDate, username);
-    }
-  });
-
-  function renderCountdownOverlay(targetDate, username) {
-    const formattedDate = targetDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-
-    const lockHTML = `
-      <div id="timeLockScreen" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#f5f2eb; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
-        <div style="background:#ffffff; border:1px solid #e2e8f0; padding:40px; border-radius:16px; max-width:480px; width:100%; box-shadow:0 10px 25px -5px rgba(0,0,0,0.05);">
-          <div style="font-size:40px; margin-bottom:12px;">🔒</div>
-          <h2 style="font-size:22px; color:#1a202c; margin-bottom:4px;">STAGE ${CURRENT_STAGE} LOCKED</h2>
-          <p style="font-size:13px; color:#2b6cb0; font-weight:700; margin-bottom:12px;">AGENT: ${username}</p>
-          <p style="font-size:14px; color:#718096; margin-bottom:20px;">This stage will unlock on <strong>${formattedDate}</strong>.</p>
-          
-          <div id="timerCountdown" style="background:#f8fafc; border:1px solid #cbd5e0; padding:16px; border-radius:10px; font-family:monospace; font-size:20px; font-weight:700; color:#2b6cb0; margin-bottom:20px;">
-            00d 00h 00m 00s
-          </div>
-
-          <p style="font-size:12px; color:#a0aec0; margin-bottom:16px;">Your username and progress are saved. You can close this page and return later.</p>
-          <a href="index.html" style="display:inline-block; padding:10px 20px; background:#edf2f7; color:#4a5568; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">BACK TO HUB</a>
-        </div>
-      </div>
-    `;
-
-    document.body.insertAdjacentHTML('beforeend', lockHTML);
-
-    const interval = setInterval(() => {
-      const remaining = targetDate - new Date();
-      if (remaining <= 0) {
-        clearInterval(interval);
-        const lockEl = document.getElementById('timeLockScreen');
-        if (lockEl) lockEl.remove();
-      } else {
-        const d = Math.floor(remaining / (1000 * 60 * 60 * 24));
-        const h = Math.floor((remaining / (1000 * 60 * 60)) % 24);
-        const m = Math.floor((remaining / 1000 / 60) % 60);
-        const s = Math.floor((remaining / 1000) % 60);
-        const timerEl = document.getElementById('timerCountdown');
-        if (timerEl) timerEl.innerText = `${d}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+      if (!username) { window.location.href = "index.html"; return; }
+      const isMasterUser = username.trim().toLowerCase() === MASTER_USERNAME.toLowerCase();
+      if (!isMasterUser && completedStage < (CURRENT_STAGE - 1)) {
+        alert(`Agent ${username}, you must complete Stage ${CURRENT_STAGE - 1} first.`);
+        window.location.href = "index.html";
       }
-    }, 1000);
-  }
-
-  function showLockOverlay(title, description) {
-    const lockHTML = `
-      <div style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#f5f2eb; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
-        <div style="background:#ffffff; border:1px solid #e2e8f0; padding:40px; border-radius:16px; max-width:480px; width:100%; box-shadow:0 10px 25px -5px rgba(0,0,0,0.05);">
-          <div style="font-size:40px; margin-bottom:12px;">🛑</div>
-          <h2 style="font-size:22px; color:#1a202c; margin-bottom:8px;">${title}</h2>
-          <p style="font-size:14px; color:#718096; margin-bottom:24px;">${description}</p>
-          <a href="index.html" style="display:inline-block; padding:12px 24px; background:#2b6cb0; color:white; border-radius:8px; text-decoration:none; font-weight:600;">RETURN TO HUB</a>
-        </div>
-      </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', lockHTML);
-  }
-</script>
+    });
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>STAGE 3</title>
-
-  <!-- TensorFlow.js and COCO-SSD CDN Libraries -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
-
+  <title>STAGE 3 - HEXADECIMAL BREAK</title>
   <style>
     * { box-sizing: border-box; }
-    body { background-color: #f5f2eb; color: #2d3748; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 24px; }
-    .stage-badge { font-size: 14px; font-weight: 700; letter-spacing: 2px; color: #718096; text-transform: uppercase; margin-bottom: 16px; }
-    .card { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); padding: 40px; border-radius: 16px; width: 100%; max-width: 520px; text-align: center; }
-    h2 { color: #1a202c; margin-top: 0; font-size: 24px; margin-bottom: 20px; }
-    .preview-box { width: 220px; height: 220px; border: 2px dashed #cbd5e0; border-radius: 16px; background: #f8fafc; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; cursor: pointer; overflow: hidden; position: relative; }
-    .preview-box img { width: 100%; height: 100%; object-fit: cover; }
-    .plus-icon { font-size: 48px; color: #a0aec0; font-weight: 300; }
-    input[type="file"] { display: none; }
-    button { padding: 16px 28px; background: #2b6cb0; color: white; border: none; font-size: 18px; font-weight: 600; cursor: pointer; border-radius: 10px; width: 100%; transition: background 0.2s; }
-    button:hover { background: #2c5282; }
-    button:disabled { background: #a0aec0; cursor: not-allowed; }
-    #status { margin-top: 16px; font-size: 15px; font-weight: 600; color: #d69e2e; word-break: break-word; }
+    body { background-color: #f5f2eb; color: #2d3748; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 16px; }
+    .stage-badge { font-size: 14px; font-weight: 700; letter-spacing: 2px; color: #718096; text-transform: uppercase; margin-bottom: 12px; }
+    .card { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); padding: 32px; border-radius: 16px; width: 100%; max-width: 520px; text-align: center; }
+    h2 { color: #1a202c; margin-top: 0; font-size: 22px; margin-bottom: 8px; }
+    p.hint { font-size: 14px; color: #718096; margin-bottom: 20px; line-height: 1.5; }
+    .hex-box { background: #0f172a; color: #38bdf8; font-family: monospace; padding: 18px; border-radius: 10px; font-size: 18px; font-weight: bold; letter-spacing: 3px; margin-bottom: 20px; }
+    input[type="text"] { width: 100%; padding: 14px; margin-bottom: 12px; border: 2px solid #cbd5e0; font-size: 16px; border-radius: 8px; text-align: center; outline: none; }
+    input[type="text"]:focus { border-color: #3182ce; }
+    button { padding: 14px; background: #2b6cb0; color: white; border: none; font-size: 16px; font-weight: 600; cursor: pointer; border-radius: 8px; width: 100%; }
   </style>
 </head>
 <body>
 
-  <div class="stage-badge">STAGE 3 OF 5</div>
+  <div class="stage-badge">STAGE 3</div>
 
   <div class="card">
-    <h2>UPLOAD A PICTURE OF A BIRD</h2>
+    <h2>[ STAGE 3: HEXADECIMAL DECODE ]</h2>
+    <p class="hint">Convert the hex string into plain ASCII text.</p>
 
-    <div class="preview-box" onclick="document.getElementById('fileInput').click()">
-      <span class="plus-icon" id="plusIcon">+</span>
-      <img id="imagePreview" style="display:none;" />
-    </div>
+    <div class="hex-box">6d 61 74 72 69 78</div>
 
-    <input type="file" id="fileInput" accept="image/*" onchange="handleFileSelect(event)">
-    <button id="verifyBtn" onclick="verifyImage()">VERIFY PHOTO</button>
-    <div id="status"></div>
+    <input type="text" id="answer" placeholder="Enter decoded word..." autocomplete="off">
+    <button onclick="checkAnswer()">SUBMIT ANSWER</button>
   </div>
 
   <script>
-    let selectedFile = null;
-    let modelPromise = cocoSsd.load();
+    async function checkAnswer() {
+      const val = document.getElementById('answer').value.trim().toLowerCase();
+      const hashed = await sha256(val);
 
-    function handleFileSelect(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      selectedFile = file;
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const preview = document.getElementById('imagePreview');
-        preview.src = e.target.result;
-        preview.style.display = 'block';
-        document.getElementById('plusIcon').style.display = 'none';
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function getExifDate(file) {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          try {
-            const view = new DataView(e.target.result);
-            if (view.getUint16(0, false) !== 0xFFD8) return resolve(null);
-            let length = view.byteLength, offset = 2;
-            while (offset < length) {
-              if (view.getUint16(offset+2, false) <= 8) return resolve(null);
-              let marker = view.getUint16(offset, false);
-              offset += 2;
-              if (marker == 0xFFE1) {
-                if (view.getUint32(offset += 2, false) !== 0x45786966) return resolve(null);
-                let little = view.getUint16(offset += 6, false) == 0x4949;
-                offset += view.getUint32(offset + 4, little);
-                let tags = view.getUint16(offset, little);
-                offset += 2;
-                for (let i = 0; i < tags; i++) {
-                  let tag = view.getUint16(offset + (i * 12), little);
-                  if (tag == 0x9003 || tag == 0x0132) {
-                    let tOffset = view.getUint32(offset + (i * 12) + 8, little);
-                    let str = "";
-                    for (let j = 0; j < 10; j++) str += String.fromCharCode(view.getUint8(tOffset + j));
-                    return resolve(str.replace(/:/g, '-'));
-                  }
-                }
-              } else {
-                offset += view.getUint16(offset, false);
-              }
-            }
-          } catch(err) {}
-          return resolve(null);
-        };
-        reader.readAsArrayBuffer(file);
-      });
-    }
-
-    async function verifyImage() {
-      const status = document.getElementById('status');
-      const btn = document.getElementById('verifyBtn');
-
-      if (!selectedFile) {
-        alert("Please select or capture a photo first.");
-        return;
-      }
-
-      btn.disabled = true;
-      status.style.color = "#d69e2e";
-      status.innerText = "Checking photo date...";
-
-      const exifDate = await getExifDate(selectedFile);
-      const today = new Date().toISOString().split('T')[0];
-
-      if (exifDate && exifDate !== today) {
-        status.style.color = "#e53e3e";
-        status.innerText = `REJECTED: Photo taken on ${exifDate}. Must be taken today (${today})!`;
-        btn.disabled = false;
-        return;
-      }
-
-      status.innerText = "Scanning photo with local AI...";
-
-      const imgElement = document.getElementById('imagePreview');
-
-      try {
-        const model = await modelPromise;
-        const predictions = await model.detect(imgElement);
-
-        const birdFound = predictions.some(p => p.class === 'bird' && p.score >= 0.30);
-
-        if (birdFound) {
-          status.style.color = "#38a169";
-          status.innerText = "VERIFIED! Bird detected.";
-
-          setTimeout(async () => {
-            await notifyStageComplete(3, "scan.html");
-          }, 1000);
-        } else {
-          status.style.color = "#e53e3e";
-          status.innerText = "REJECTED: No bird detected in the image.";
-          btn.disabled = false;
-        }
-
-      } catch (err) {
-        status.style.color = "#e53e3e";
-        status.innerText = "Error analyzing image: " + err.message;
-        btn.disabled = false;
+      // SHA-256 Hash of "matrix"
+      if (hashed === "e28e121528659838006d649ff52d7e6c1e3458ed0567a57a414164cbcae741c0") {
+        localStorage.setItem('completed_stage', '3');
+        await sendWebhook(3);
+        window.location.href = "scan.html";
+      } else {
+        alert("INCORRECT WORD. Convert Hex pairs to ASCII characters!");
       }
     }
   </script>
