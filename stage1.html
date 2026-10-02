@@ -5,8 +5,9 @@
     // =========================================================
     // CONFIGURATION FOR THIS FILE
     // =========================================================
-    const CURRENT_STAGE = 1; // Change to 2, 3, 5, 6, etc. depending on the file
-    const MASTER_USERNAME = "PandaSmugs"; // Master bypass username
+    const CURRENT_STAGE = 1; 
+    const MASTER_USERNAME = "PandaSmugs"; 
+    const STAGE_WEBHOOK_URL = "YOUR_STAGE_WEBHOOK_URL_HERE"; // Put your stage webhook URL here
 
     const UNLOCK_DATES = {
       1: new Date(2026, 9, 1, 0, 0, 0),  // Oct 1, 12:00 AM
@@ -18,27 +19,45 @@
       7: null                             // Stage 7 & Victory - Immediate after Stage 6
     };
 
+    async function notifyStageComplete(stageNum, nextStageUrl) {
+      const username = localStorage.getItem('username') || 'An Agent';
+      localStorage.setItem('completed_stage', stageNum.toString());
+
+      if (STAGE_WEBHOOK_URL && STAGE_WEBHOOK_URL !== "YOUR_STAGE_WEBHOOK_URL_HERE") {
+        try {
+          await fetch(STAGE_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              content: `🎉 **${username}** has completed stage ${stageNum}!`
+            }),
+            keepalive: true
+          });
+        } catch (err) {
+          console.error("Webhook error:", err);
+        }
+      }
+
+      window.location.href = nextStageUrl;
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       const username = localStorage.getItem('username');
       const completedStage = parseInt(localStorage.getItem('completed_stage') || '0');
       const requiredPreviousStage = CURRENT_STAGE - 1;
 
-      // 1. Force Username Entry
       if (!username) {
         window.location.href = "index.html";
         return;
       }
 
-      // Check if current user is the master admin
       const isMasterUser = username.trim().toLowerCase() === MASTER_USERNAME.toLowerCase();
 
-      // 2. Check Prerequisite Progress
       if (!isMasterUser && completedStage < requiredPreviousStage) {
         showLockOverlay(`Stage ${requiredPreviousStage} Required`, `Agent ${username}, you must complete Stage ${requiredPreviousStage} before accessing this stage.`);
         return;
       }
 
-      // 3. Check Date Unlock Schedule (BYPASSED IF MASTER USER)
       const targetDate = UNLOCK_DATES[CURRENT_STAGE];
       const now = new Date();
 
@@ -145,13 +164,12 @@
   </div>
 
   <script>
-    function checkAnswer() {
+    async function checkAnswer() {
       const val = document.getElementById('answer').value.trim().toLowerCase();
       const validAnswers = ['fire', 'a fire', 'the fire'];
       
       if (validAnswers.includes(val)) {
-        localStorage.setItem('completed_stage', '1');
-        window.location.href = "stage2.html";
+        await notifyStageComplete(1, "stage2.html");
       } else {
         alert("INCORRECT KEY. Translate the Morse code banner on top for a hint.");
       }
