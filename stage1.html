@@ -173,13 +173,16 @@
     const val = document.getElementById('answer').value.trim().toLowerCase();
     const hashedInput = await sha256(val);
     
-    // Verified SHA-256 hashes for: "fire", "the fire", and "a fire"
+    // Debug output: Press F12 -> Console to see your input hash
+    console.log("User Input:", val);
+    console.log("Generated SHA-256 Hash:", hashedInput);
+
     const validHashes = [
-      "36bbe50ed96841d10443bcb670d6554f0a34b761be67ec9c4a8ad2c0c44ca42c", 
-      "090886c99c5a17a78eb512b93d3b76ed5a2a2c1f0340b154ef98e9be2d721107", 
-      "d399990b793fae5ddedff71810b42f6fb39f60b4fb9b4ddbc6d43e1cfcf0d7d8" 
+      "36bbe50ed96841d10443bcb670d6554f0a34b761be67ec9c4a8ad2c0c44ca42c", // "fire"
+      "090886c99c5a17a78eb512b93d3b76ed5a2a2c1f0340b154ef98e9be2d721107", // "the fire"
+      "d399990b793fae5ddedff71810b42f6fb39f60b4fb9b4ddbc6d43e1cfcf0d7d8"  // "a fire"
     ];
-    
+
     if (validHashes.includes(hashedInput)) {
       await notifyStageComplete(1, "stage2.html");
     } else {
