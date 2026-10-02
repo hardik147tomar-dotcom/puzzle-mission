@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    const CURRENT_STAGE = 11;
+    const MASTER_USERNAME = "PandaSmugs";
+    const WEBHOOK_URL = "https://discord.com/api/webhooks/1555513534131998760/G0Y_mR8veWOJarUBBs52oYIjSS4LIG-a2rsSwgrHbdsQhBSK9EZiMjOFU7OrRSo_Zt3B";
+
+    async function sha256(str) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    async function sendWebhook(stageNum) {
+      const username = localStorage.getItem('username') || 'Unknown Agent';
+      try {
+        await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: `🎯 **Agent ${username}** has successfully completed **Stage ${stageNum}**!` }),
+          keepalive: true
+        });
+      } catch (e) { console.error("Webhook error:", e); }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const username = localStorage.getItem('username');
+      const completedStage = parseInt(localStorage.getItem('completed_stage') || '0');
+
+      if (!username) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      const isMasterUser = username.trim().toLowerCase() === MASTER_USERNAME.toLowerCase();
+      if (!isMasterUser && completedStage < CURRENT_STAGE - 1) {
+        alert(`Agent ${username}, you must complete Stage ${CURRENT_STAGE - 1} first.`);
+        window.location.href = "index.html";
+      }
+    });
+
+    async function checkAnswer() {
+      const input = document.getElementById('answer');
+      const status = document.getElementById('status');
+      const button = document.getElementById('verifyBtn');
+      const normalized = input.value.trim().toLowerCase().replace(/\s+/g, ' ');
+
+      if (!normalized) {
+        status.textContent = "ENTER THE STREET NAME.";
+        status.style.color = "#d69e2e";
+        return;
+      }
+
+      button.disabled = true;
+      const hash = await sha256(normalized);
+      const validHash = "f7c03a69eb688d7dfe85f12ed4f986cb1cf29c7b7f52724d2783deb859757a4f";
+
+      if (hash === validHash) {
+        status.textContent = "VERIFIED. STREET IDENTIFIED.";
+        status.style.color = "#38a169";
+        localStorage.setItem('completed_stage', '11');
+        await sendWebhook(11);
+        setTimeout(() => { window.location.href = "stage12.html"; }, 900);
+      } else {
+        status.textContent = "INCORRECT STREET. RE-EXAMINE THE LOCATION.";
+        status.style.color = "#e53e3e";
+        button.disabled = false;
+      }
+    }
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STAGE 11 - STREET RECON</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { background:#f5f2eb; color:#2d3748; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; margin:0; padding:16px; }
+    .stage-badge { font-size:14px; font-weight:700; letter-spacing:2px; color:#718096; text-transform:uppercase; margin-bottom:12px; }
+    .card { background:#fff; border:1px solid #e2e8f0; box-shadow:0 10px 25px -5px rgba(0,0,0,.05); padding:32px; border-radius:16px; width:100%; max-width:620px; text-align:center; }
+    h2 { color:#1a202c; margin:0 0 8px; font-size:22px; }
+    p.hint { font-size:14px; color:#718096; margin:0 0 22px; line-height:1.5; }
+    .image-wrap { background:#f8fafc; border:1px solid #cbd5e0; border-radius:12px; padding:10px; margin-bottom:22px; }
+    .image-wrap img { display:block; width:100%; max-height:380px; object-fit:contain; border-radius:8px; }
+    .image-note { font-size:12px; color:#a0aec0; margin-top:8px; }
+    input { width:100%; padding:14px; margin-bottom:12px; border:2px solid #cbd5e0; font-size:16px; border-radius:8px; text-align:center; outline:none; }
+    input:focus { border-color:#3182ce; }
+    button { padding:14px; background:#2b6cb0; color:#fff; border:none; font-size:16px; font-weight:600; cursor:pointer; border-radius:8px; width:100%; }
+    button:hover { background:#2c5282; }
+    button:disabled { background:#a0aec0; cursor:not-allowed; }
+    #status { margin-top:16px; font-size:14px; font-weight:700; min-height:20px; }
+  </style>
+</head>
+<body>
+  <div class="stage-badge">STAGE 11 OF 13</div>
+  <div class="card">
+    <h2>[ STAGE 11: FOLLOW THE TRAIL ]</h2>
+    <p class="hint">Identify the business shown in the photograph, then determine the street on which it is located.</p>
+
+    <div class="image-wrap">
+      <img src="captain-quackenbush.jpg" alt="Location photograph">
+      <div class="image-note">Study the photograph carefully. The business sign is your first clue.</div>
+    </div>
+
+    <input type="text" id="answer" placeholder="Enter street name..." autocomplete="off" onkeydown="if(event.key==='Enter') checkAnswer()">
+    <button id="verifyBtn" onclick="checkAnswer()">VERIFY STREET</button>
+    <div id="status"></div>
+  </div>
+</body>
+</html>
